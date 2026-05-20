@@ -9,7 +9,7 @@ pygame.init()
 pantalla = pygame.display.set_mode((1280, 720))       
 reloj = pygame.time.Clock()
 corriendo = True
-dt = 0      #delta tiempo
+dt = 0 #delta tiempo
 pacman = PacMan(x = pantalla.get_width() / 2, y = pantalla.get_height() / 2, vidas = 3, velocidad=100)
 
 while corriendo:

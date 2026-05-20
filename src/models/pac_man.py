@@ -23,4 +23,3 @@ class PacMan:
             self.x -= self.velocidad * dt
 
     #metodo que le saca la vida
-    #hacer otra clase para fantasmas y otra para manejar el jueg(puntaje, mapa, jugador, fantasmas)
