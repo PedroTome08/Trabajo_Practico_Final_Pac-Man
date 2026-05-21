@@ -4,6 +4,7 @@ import pygame
 sys.path.append("..")
 
 from models.pac_man import PacMan
+from models.mapa import Mapa
 
 pygame.init()
 pantalla = pygame.display.set_mode((1280, 720))       
@@ -11,16 +12,19 @@ reloj = pygame.time.Clock()
 corriendo = True
 dt = 0 #delta tiempo
 pacman = PacMan(x = pantalla.get_width() / 2, y = pantalla.get_height() / 2, vidas = 3, velocidad=100)
+mapa = Mapa("src/models/mapa_txt.txt")
 
 while corriendo:
     #acá se almacenan los movimientos
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             corriendo = False
-
+    
     #color de la pantalla
-    pantalla.fill("black") 
-
+    pantalla.fill("black")
+    
+    #dibujo el mapa y el pacman
+    mapa.dibujar(pantalla)
     pacman.dibujar(pantalla)
     
     #que pasa cuando toco las teclas AWSD para moverlo
