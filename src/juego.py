@@ -7,13 +7,13 @@ from models.pac_man import PacMan
 from models.mapa import Mapa
 
 pygame.init()
-pantalla = pygame.display.set_mode((1280, 720))       
+ANCHO, ALTO = 1280, 720
+pantalla = pygame.display.set_mode((ANCHO, ALTO))
 reloj = pygame.time.Clock()
 corriendo = True
 dt = 0 #delta tiempo
-pacman = PacMan(x = pantalla.get_width() / 2, y = pantalla.get_height() / 2, vidas = 3, velocidad=100)
-mapa = Mapa("src/models/mapa_txt.txt")
-
+mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
+pacman = PacMan(x = mapa.offset_x + mapa.ancho / 2, y = mapa.offset_y + mapa.alto / 2, vidas = 3, velocidad=100)
 while corriendo:
     #acá se almacenan los movimientos
     for evento in pygame.event.get():
