@@ -24,7 +24,6 @@ class Menu:
         self.mostrar_enter = True
         self.tiempo_parpadeo = 0
         
-        self.fantasmas_disponibles = ["Blinky", "Pinky", "Inky", "Clyde", "Fantasma 5", "Fantasma 6"] #NO OLVIDAR DE PONER LOS NOMBRES DE LOS ULTIMOS DOS FANTASMAS
         self.fantasmas_elegidos = []
         self.esquinas = ["sup_izq", "sup_der", "inf_izq", "inf_der"]
         self.opcion_actual = 0
@@ -35,8 +34,8 @@ class Menu:
             {"id": 2, "nombre": "Pinky", "color": (255, 182, 193), "desc": "Rosa - El Emboscador"},
             {"id": 3, "nombre": "Inky", "color": (0, 255, 255), "desc": "Celeste - El Flanqueador"},
             {"id": 4, "nombre": "Clyde", "color": (255, 165, 0), "desc": "Naranja - El Tímido"},
-            {"id": 5, "nombre": "Fantasma 5", "color": (0, 0, 0), "desc": ""}, #falta crear el fantasma 5
-            {"id": 6, "nombre": "Fantasma 6", "color": (0, 0, 0), "desc": ""} #falta crear el fantasma 6
+            {"id": 5, "nombre": "Fantasma 5", "color": (0, 0, 0), "desc": "agregar - descripcion"}, #falta crear el fantasma 5
+            {"id": 6, "nombre": "Fantasma 6", "color": (0, 0, 0), "desc": "agregar - descripcion"} #falta crear el fantasma 6
         ]
         
     def actualizar(self, dt):
@@ -84,8 +83,9 @@ class Menu:
                     indice_fantasma = self.fantasmas_elegidos[self.opcion_actual]
                     nombre_fantasma = self.fantasmas_info[indice_fantasma]["nombre"]
                     
-                    self.config_final[nombre_fantasma] = self.esquinas[indice_esquina] #guarda cada fantasma con su esquina en el diccionario vacio config_final
-                    self.opcion_actual += 1
+                    if self.esquinas[indice_esquina] not in self.config_final.values(): #para no repetir esquinas
+                        self.config_final[nombre_fantasma] = self.esquinas[indice_esquina] #guarda cada fantasma con su esquina en el diccionario vacio config_final
+                        self.opcion_actual += 1
                     
                     if self.opcion_actual >= 4:
                         self.estado = "MENU_TERMINADO"
@@ -108,7 +108,7 @@ class Menu:
     
     def dibujar_inicio(self, pantalla):
         texto_arriba = self.fuente_chica.render("HIGH SCORE", True, (120, 120, 120))
-        texto_score = self.fuente_chica.render(self.high_score, True, (0, 255, 0))
+        texto_score = self.fuente_chica.render(str(self.high_score), True, (0, 255, 0)) #?
         texto_titulo = self.fuente_titulo.render("PAC-MAN", True, (255, 255, 0))
         
         pantalla.blit(texto_arriba, (self.ancho // 2 - texto_arriba.get_width() // 2, 80))
@@ -147,10 +147,6 @@ class Menu:
             if i in self.fantasmas_elegidos:
                 pygame.draw.rect(pantalla, (255, 255, 255), (self.ancho // 2 - 230, y_pos - 8, 550, 48), 2)
         
-        #texto de instrucciones para el usuario
-        texto_instrucciones = self.fuente_chica.render("Teclas 1-6 para seleccionar/deseleccionar  ·  ENTER para confirmar", True, (100, 100, 100))
-        pantalla.blit(texto_instrucciones, (self.ancho // 2 - texto_instrucciones.get_width() // 2, self.alto - 60))
-
     def dibujar_seleccion_esquinas(self, pantalla):
         fantasma_indice = self.fantasmas_elegidos[self.opcion_actual]
         f = self.fantasmas_info[fantasma_indice]
