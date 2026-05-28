@@ -5,43 +5,55 @@ sys.path.append("..")
 
 from models.pac_man import PacMan
 from models.mapa import Mapa
+from models.menu import Menu
 
 pygame.init()
-#menu
+
 ANCHO, ALTO = 1280, 720
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 reloj = pygame.time.Clock()
 corriendo = True
 dt = 0 #delta tiempo
+
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
 pacman = PacMan(x = mapa.offset_x + mapa.ancho / 2, y = mapa.offset_y + mapa.alto / 2, vidas = 3, velocidad=100)
+menu = Menu(ANCHO, ALTO)
 
 while corriendo:
     #acá se almacenan los movimientos
     for evento in pygame.event.get():
+       
         if evento.type == pygame.QUIT:
             corriendo = False
+
+        if menu.estado != "MENU_TERMINADO":
+            menu.manejar_eventos(evento)
     
-    #color de la pantalla
-    pantalla.fill("black")
+    if menu.estado != "TERMINADO":
+        menu.actualizar(dt)
+        menu.dibujar(pantalla)
     
-    #dibujo el mapa y el pacman
-    mapa.dibujar(pantalla)
-    pacman.dibujar(pantalla)
+    else:
+            
+        #color de la pantalla
+        pantalla.fill("black")
     
-    #que pasa cuando toco las teclas AWSD para moverlo
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        pacman.mover("arriba", dt)
-    if keys[pygame.K_s]:
-        pacman.mover("abajo", dt)
-    if keys[pygame.K_a]:
-        pacman.mover("izquierda", dt)
-    if keys[pygame.K_d]:
-        pacman.mover("derecha", dt)
+        #dibujo el mapa y el pacman
+        mapa.dibujar(pantalla)
+        pacman.dibujar(pantalla)
+    
+        #que pasa cuando toco las teclas AWSD para moverlo
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            pacman.mover("arriba", dt)
+        if keys[pygame.K_s]:
+            pacman.mover("abajo", dt)
+        if keys[pygame.K_a]:
+            pacman.mover("izquierda", dt)
+        if keys[pygame.K_d]:
+            pacman.mover("derecha", dt)
 
     pygame.display.flip()
-
     dt = reloj.tick(60) / 1000
 
 pygame.quit()
