@@ -20,9 +20,9 @@ class Mapa:
         self.tile = min(ancho_pantalla // self.columnas,
         alto_pantalla  // self.filas)
         self.offset_x = (ancho_pantalla - self.columnas * self.tile) // 2
-        self.offset_y = (alto_pantalla  - self.filas    * self.tile) // 2
+        self.offset_y = (alto_pantalla - self.filas * self.tile) // 2
         self.ancho = self.columnas * self.tile
-        self.alto  = self.filas    * self.tile
+        self.alto  = self.filas * self.tile
     
     def _es_pared(self, fila, col):
         if 0 <= fila < self.filas and 0 <= col < self.columnas:
