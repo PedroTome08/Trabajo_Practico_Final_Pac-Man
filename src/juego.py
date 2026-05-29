@@ -29,7 +29,7 @@ while corriendo:
         if menu.estado != "MENU_TERMINADO":
             menu.manejar_eventos(evento)
     
-    if menu.estado != "TERMINADO":
+    if menu.estado != "MENU_TERMINADO":
         menu.actualizar(dt)
         menu.dibujar(pantalla)
     

@@ -58,7 +58,7 @@ class Menu:
         
         if self.estado == "INICIO":
             if evento.key == pygame.K_RETURN: #si el usuario presiona enter
-                self.estado == "SELECCION_FANTASMAS" #pasa a la seleccion de fantasmas
+                self.estado = "SELECCION_FANTASMAS" #pasa a la seleccion de fantasmas
                 
         elif self.estado == "SELECCION_FANTASMAS":
             
