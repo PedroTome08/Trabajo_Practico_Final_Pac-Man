@@ -27,22 +27,25 @@ class Menu:
         self.fantasmas_elegidos = []
         self.esquinas = ["sup_izq", "sup_der", "inf_izq", "inf_der"]
         self.opcion_actual = 0
-        self.config_final = {} #guarda a cada fantasma con su esquina
+        #guarda a cada fantasma con su esquina
+        self.config_final = {} 
         
         self.fantasmas_info = [
             {"id": 1, "nombre": "Blinky", "color": (255, 0, 0), "desc": "Rojo - El Perseguidor"},
             {"id": 2, "nombre": "Pinky", "color": (255, 182, 193), "desc": "Rosa - El Emboscador"},
             {"id": 3, "nombre": "Inky", "color": (0, 255, 255), "desc": "Celeste - El Flanqueador"},
             {"id": 4, "nombre": "Clyde", "color": (255, 165, 0), "desc": "Naranja - El Tímido"},
-            {"id": 5, "nombre": "Fantasma 5", "color": (0, 0, 0), "desc": "agregar - descripcion"}, #falta crear el fantasma 5
-            {"id": 6, "nombre": "Fantasma 6", "color": (0, 0, 0), "desc": "agregar - descripcion"} #falta crear el fantasma 6
+            #falta crear los fantasmas 5 y. 6
+            #les puse temporalmente el mismo color porque si dejaba el (0, 0, 0) no iban a verse en la pantalla por ser de color negro
+            {"id": 5, "nombre": "Fantasma 5", "color": (255, 255, 255), "desc": "agregar - descripcion"},
+            {"id": 6, "nombre": "Fantasma 6", "color": (255, 255, 255), "desc": "agregar - descripcion"}
         ]
         
-    def actualizar(self, dt):
+    def actualizar(self, dt: float):
         """_summary_
 
-        Args:
-            dt (_type_): _description_
+        Argumentos:
+            dt (float): _description_
         """
         if self.estado == "INICIO":
             #como hacer que el texto parpadee cada medio segundo
@@ -53,38 +56,48 @@ class Menu:
                 self.tiempo_parpadeo = 0
     
     def manejar_eventos(self, evento):
-        if evento.type != pygame.KEYDOWN: #si el usuario no presiona ninguna tecla, sale de la funcion
+        #si el usuario no presiona ninguna tecla, sale de la funcion
+        if evento.type != pygame.KEYDOWN:
              return
         
         if self.estado == "INICIO":
-            if evento.key == pygame.K_RETURN: #si el usuario presiona enter
-                self.estado = "SELECCION_FANTASMAS" #pasa a la seleccion de fantasmas
+            #si el usuario presiona enter
+            if evento.key == pygame.K_RETURN:
+                #pasa a la seleccion de fantasmas
+                self.estado = "SELECCION_FANTASMAS"
                 
         elif self.estado == "SELECCION_FANTASMAS":
             
             #hago un if que se ejecute si el usuario apreta una tecla del 1 al 6 para elegir fantasmas
             if pygame.K_1 <= evento.key <= pygame.K_6:
-                indice = evento.key - pygame.K_1 #indice que hace referencia al "id" de cada fantasma en su diccionario en self.fantasmas_info
+                #indice que hace referencia al "id" de cada fantasma en su diccionario en self.fantasmas_info
+                indice = evento.key - pygame.K_1
                 
                 if indice in self.fantasmas_elegidos:
                     self.fantasmas_elegidos.remove(indice)
                 
-                elif len(self.fantasmas_elegidos) < 4: #si el usuario todavia no eligio los 4 fantasmas, puede elegir otro
+                #si el usuario todavia no eligio los 4 fantasmas, puede elegir otro
+                elif len(self.fantasmas_elegidos) < 4: 
                     self.fantasmas_elegidos.append(indice)
             
-            elif evento.key == pygame.K_RETURN and len(self.fantasmas_elegidos) == 4: #si el usuario apreta enter y ya eligio los 4 fantasmas, pasa a la seleccion de esquinas
+            #si el usuario apreta enter y ya eligio los 4 fantasmas, pasa a la seleccion de esquinas
+            elif evento.key == pygame.K_RETURN and len(self.fantasmas_elegidos) == 4: 
                 self.estado = "SELECCION_ESQUINAS"
                 self.opcion_actual = 0 #reseteo la opcion actual para que empiece desde el primer fantasma elegido en la seleccion de esquinas
         
         elif self.estado == "SELECCION_ESQUINAS":
             
-            if pygame.K_1 <= evento.key <= pygame.K_4: #si el usuario apreta una tecla del 1 al 4 para elegir la esquina de cada fantasma
-                    indice_esquina = evento.key - pygame.K_1 #indice que hace referencia a la esquina elegida para cada fantasma
+            #si el usuario apreta una tecla del 1 al 4 para elegir la esquina de cada fantasma
+            if pygame.K_1 <= evento.key <= pygame.K_4: 
+                    #indice que hace referencia a la esquina elegida para cada fantasma
+                    indice_esquina = evento.key - pygame.K_1
                     indice_fantasma = self.fantasmas_elegidos[self.opcion_actual]
                     nombre_fantasma = self.fantasmas_info[indice_fantasma]["nombre"]
                     
-                    if self.esquinas[indice_esquina] not in self.config_final.values(): #para no repetir esquinas
-                        self.config_final[nombre_fantasma] = self.esquinas[indice_esquina] #guarda cada fantasma con su esquina en el diccionario vacio config_final
+                    #para no repetir esquinas
+                    if self.esquinas[indice_esquina] not in self.config_final.values():
+                        #guarda cada fantasma con su esquina en el diccionario vacio config_final
+                        self.config_final[nombre_fantasma] = self.esquinas[indice_esquina]
                         self.opcion_actual += 1
                     
                     if self.opcion_actual >= 4:
@@ -97,7 +110,8 @@ class Menu:
         # delta_time = 1 / FPS
     
     def dibujar(self, pantalla):
-        pantalla.fill((0, 0, 0)) #pantalla negra
+        #pantalla negra
+        pantalla.fill((0, 0, 0))
         
         if self.estado == "INICIO":
             self.dibujar_inicio(pantalla)
@@ -137,11 +151,14 @@ class Menu:
             color_texto = (255, 255, 255) if i in self.fantasmas_elegidos else (120, 120, 120)
             texto_opcion = f"{f['id']} {f['nombre']}"
             texto_f = self.fuente_normal.render(texto_opcion, True, color_texto)
-            pantalla.blit(texto_f, (self.ancho // 2 - 160, y_pos))
+            pos_x_nombre = self.ancho // 2 - 160
+            pantalla.blit(texto_f, (pos_x_nombre, y_pos))
             
             #subtexto de la descripcion de los fantasmas
             texto_desc = self.fuente_chica.render(f"— {f['desc'].split(' - ')[1]}", True, (100, 100, 100))
-            pantalla.blit(texto_desc, (self.ancho // 2 - 20, y_pos + 6))
+            #toma la posición X del nombre, le suma el ancho exacto del nombre y le suma 20 píxeles de margen
+            pos_x_desc = pos_x_nombre + texto_f.get_width() + 20 
+            pantalla.blit(texto_desc, (pos_x_desc, y_pos + 6))
             
             #recuadro blanco si esta seleccionado
             if i in self.fantasmas_elegidos:
