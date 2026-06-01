@@ -41,9 +41,11 @@ while corriendo:
     
         #dibujo el mapa y el pacman
         mapa.dibujar(pantalla)
-        pacman.dibujar(pantalla)
-    
+        pacman.moviendose = False
+        keys = pygame.key.get_pressed()    
         #que pasa cuando toco las teclas AWSD para moverlo
+        pacman.moviendose = False
+        keys = pygame.key.get_pressed()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
             pacman.mover("arriba", dt)
@@ -54,6 +56,8 @@ while corriendo:
         if keys[pygame.K_d]:
             pacman.mover("derecha", dt)
 
+        pacman.actualizar(dt)
+        pacman.dibujar(pantalla)
     pygame.display.flip()
     dt = reloj.tick(60) / 1000
 
