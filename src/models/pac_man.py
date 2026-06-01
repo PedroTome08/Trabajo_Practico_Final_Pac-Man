@@ -6,32 +6,42 @@ class PacMan:
         self.y = y
         self.vidas = vidas
         self.velocidad = velocidad
-        self.radio = 20
+        self.radio = 10
         self.direccion = "derecha"
         self.anguloBoca = 0
         self.abierta = True
-        self.velocidad_animacion = 200
-        self.moviendose = False
+        self.velocidad_animacion = 300
+        self.moviendose = True
     
     #función que dibuje al pacman
     
     def actualizar(self, dt):
-        if not self.moviendose:
-            return
+        if self.direccion == "arriba":
+            self.y -= self.velocidad * dt
+        elif self.direccion == "abajo":
+            self.y += self.velocidad * dt
+        elif self.direccion == "derecha":
+            self.x += self.velocidad * dt
+        elif self.direccion == "izquierda":
+            self.x -= self.velocidad * dt
+
         if self.abierta:
             self.anguloBoca += self.velocidad_animacion * dt
-            if self.anguloBoca >= 15:
+            if self.anguloBoca >= 35:
                 self.abierta = False
         else:
             self.anguloBoca -= self.velocidad_animacion * dt
             if self.anguloBoca <= 0:
                 self.abierta = True
 
+    def mover(self, movimiento):
+        self.direccion = movimiento.lower()
+
     def dibujar(self, pantalla):
         rotaciones = {
             "derecha":    0,
             "izquierda": 180,
-            "arriba":     90,
+            "arriba":     90, # angulos de rotacion del pacman
             "abajo":     270,
         }
 
@@ -45,17 +55,5 @@ class PacMan:
             puntos.append((self.x + v.x, self.y + v.y))
         
         pygame.draw.polygon(pantalla, "yellow", puntos)
-
-    def mover(self, movimiento, dt):
-        self.direccion = movimiento
-        self.moviendose = True
-        if movimiento == "arriba":
-            self.y -= self.velocidad * dt
-        elif movimiento == 'abajo':
-            self.y += self.velocidad * dt
-        elif movimiento == 'derecha':
-            self.x += self.velocidad * dt
-        elif movimiento == 'izquierda':
-            self.x -= self.velocidad * dt
 
     #metodo que le saca la vida

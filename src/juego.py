@@ -47,14 +47,14 @@ while corriendo:
         pacman.moviendose = False
         keys = pygame.key.get_pressed()
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            pacman.mover("arriba", dt)
-        if keys[pygame.K_s]:
-            pacman.mover("abajo", dt)
-        if keys[pygame.K_a]:
-            pacman.mover("izquierda", dt)
-        if keys[pygame.K_d]:
-            pacman.mover("derecha", dt)
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            pacman.mover("arriba")
+        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            pacman.mover("abajo")
+        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            pacman.mover("izquierda")
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            pacman.mover("derecha")
 
         pacman.actualizar(dt)
         pacman.dibujar(pantalla)
