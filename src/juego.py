@@ -6,6 +6,7 @@ sys.path.append("..")
 from models.pac_man import PacMan
 from models.mapa import Mapa
 from models.menu import Menu
+from models.fantasmas import Fantasma
 
 pygame.init()
 
@@ -15,10 +16,12 @@ reloj = pygame.time.Clock()
 corriendo = True
 #delta tiempo
 dt = 0
-
+sonido_iniciado = False
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
-pacman = PacMan(x = mapa.offset_x + mapa.ancho / 2, y = mapa.offset_y + mapa.alto / 2, vidas = 3, velocidad=100)
 menu = Menu(ANCHO, ALTO)
+col = 13
+fila = 23
+pacman = PacMan(x = mapa.offset_x + col * mapa.tile + mapa.tile / 2, y = mapa.offset_y + fila * mapa.tile + mapa.tile / 2, vidas = 3, velocidad=100)
 
 while corriendo:
     #acá se almacenan los movimientos
@@ -35,17 +38,16 @@ while corriendo:
         menu.dibujar(pantalla)
     
     else:
-            
+        if not sonido_iniciado:
+            pygame.mixer.music.play(-1)            
+            sonido_iniciado = True
         #color de la pantalla
         pantalla.fill("black")
     
         #dibujo el mapa y el pacman
         mapa.dibujar(pantalla)
-        pacman.moviendose = False
-        keys = pygame.key.get_pressed()    
         #que pasa cuando toco las teclas AWSD para moverlo
         pacman.moviendose = False
-        keys = pygame.key.get_pressed()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w] or keys[pygame.K_UP]:
             pacman.mover("arriba")
@@ -55,7 +57,6 @@ while corriendo:
             pacman.mover("izquierda")
         elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             pacman.mover("derecha")
-
         pacman.actualizar(dt)
         pacman.dibujar(pantalla)
     pygame.display.flip()

@@ -12,6 +12,8 @@ class PacMan:
         self.abierta = True
         self.velocidad_animacion = 300
         self.moviendose = True
+        pygame.mixer.init()
+        pygame.mixer.music.load("src/models/pacman_sound.mp3")
     
     #función que dibuje al pacman
     
