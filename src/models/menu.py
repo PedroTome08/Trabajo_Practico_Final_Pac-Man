@@ -177,7 +177,7 @@ class Menu:
         
         for i, esquina in enumerate(self.esquinas):
             
-            if esquina in self.config_final():
+            if esquina in self.config_final:
                 color = (80, 80, 80)
             else:
                 color = (255, 255, 255)

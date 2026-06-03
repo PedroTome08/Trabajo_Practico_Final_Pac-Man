@@ -64,8 +64,9 @@ while corriendo:
             pacman.mover("izquierda")
         elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             pacman.mover("derecha")
-        pacman.actualizar(dt)
+        pacman.actualizar(dt, mapa)
         pacman.dibujar(pantalla)
+    
     pygame.display.flip()
     dt = reloj.tick(60) / 1000
 
