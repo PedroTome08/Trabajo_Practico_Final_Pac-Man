@@ -7,6 +7,7 @@ from models.pac_man import PacMan
 from models.mapa import Mapa
 from models.menu import Menu
 from models.fantasmas import Fantasma
+from models.estados import Estado
 
 pygame.init()
 
@@ -22,6 +23,7 @@ menu = Menu(ANCHO, ALTO)
 col = 13
 fila = 23
 pacman = PacMan(x = mapa.offset_x + col * mapa.tile + mapa.tile / 2, y = mapa.offset_y + fila * mapa.tile + mapa.tile / 2, vidas = 3, velocidad=100)
+estado_global = Estado()
 
 while corriendo:
     #acá se almacenan los movimientos
@@ -41,12 +43,17 @@ while corriendo:
         if not sonido_iniciado:
             pygame.mixer.music.play(-1)            
             sonido_iniciado = True
+        
         #color de la pantalla
         pantalla.fill("black")
     
         #dibujo el mapa y el pacman
         mapa.dibujar(pantalla)
-        #que pasa cuando toco las teclas AWSD para moverlo
+        
+        #actualizo el reloj de los fantasmas
+        estado_global.actualizar(dt)
+        
+        #que pasa cuando toco las teclas WASD o las flechas del teclado para moverlo
         pacman.moviendose = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w] or keys[pygame.K_UP]:
