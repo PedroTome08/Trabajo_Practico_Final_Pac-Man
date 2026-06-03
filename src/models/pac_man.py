@@ -15,8 +15,6 @@ class PacMan:
         pygame.mixer.init()
         pygame.mixer.music.load("src/models/pacman_sound.mp3")
     
-    #función que dibuje al pacman
-    
     def actualizar(self, dt):
         if self.direccion == "arriba":
             self.y -= self.velocidad * dt
@@ -41,10 +39,10 @@ class PacMan:
 
     def dibujar(self, pantalla):
         rotaciones = {
-            "derecha":    0,
+            "derecha": 0,
             "izquierda": 180,
-            "arriba":     90, # angulos de rotacion del pacman
-            "abajo":     270,
+            "arriba": 90, #angulos de rotacion del pacman
+            "abajo": 270,
         }
 
         rotacion = rotaciones[self.direccion]

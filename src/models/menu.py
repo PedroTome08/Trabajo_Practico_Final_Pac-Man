@@ -25,7 +25,7 @@ class Menu:
         self.tiempo_parpadeo = 0
         
         self.fantasmas_elegidos = []
-        self.esquinas = ["sup_izq", "sup_der", "inf_izq", "inf_der"]
+        self.esquinas = ["Superior Izquierda", "Superior Derecha", "Inferior Izquierda", "Inferior Derecha"]
         self.opcion_actual = 0
         #guarda a cada fantasma con su esquina
         self.config_final = {} 
@@ -104,7 +104,7 @@ class Menu:
                         self.estado = "MENU_TERMINADO"
             
         elif self.estado == "MENU_TERMINADO":
-            pass
+            pass #creo que aca falta algo
         
         # ticksLastFrame = pygame.time.get_ticks()
         # delta_time = 1 / FPS
@@ -176,6 +176,12 @@ class Menu:
         separacion = 55
         
         for i, esquina in enumerate(self.esquinas):
-            texto_esquina = self.fuente_normal.render(f"{i+1}. {esquina}", True, (255, 255, 255))
-            pantalla.blit(texto_esquina, (self.ancho // 2 - 180, start_y + i * separacion))
+            
+            if esquina in self.config_final():
+                color = (80, 80, 80)
+            else:
+                color = (255, 255, 255)
+            
+            texto_esquina = self.fuente_normal.render(f'{i+1}. {esquina}', True, color)
+            pantalla.blit(texto_esquina, (self.ancho // 2 - 180, start_y + 1 * separacion))
             

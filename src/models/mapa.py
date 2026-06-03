@@ -61,3 +61,10 @@ class Mapa:
                     pygame.draw.line(pantalla, "purple", (x, y + t // 2), (x + t, y + t // 2), 3) #+ t//2 para centrar la linea en el tile
                 #elif tile == "P":
                     #posicion inicial de pacman
+                    
+    def pasillo_pixel(self, x, y):
+        col = int((x - self.offset_x) // self.tile)
+        fil = int((y - self.offset_y) // self.tile)
+        
+        #si esta adentro del mapa y no es pared, es pasillo valido
+        return not self._es_pared(fil, col)
