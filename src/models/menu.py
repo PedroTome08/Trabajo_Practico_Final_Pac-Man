@@ -177,11 +177,11 @@ class Menu:
         
         for i, esquina in enumerate(self.esquinas):
             
-            if esquina in self.config_final:
+            if esquina in self.config_final.values():
                 color = (80, 80, 80)
             else:
                 color = (255, 255, 255)
             
             texto_esquina = self.fuente_normal.render(f'{i+1}. {esquina}', True, color)
-            pantalla.blit(texto_esquina, (self.ancho // 2 - 180, start_y + 1 * separacion))
+            pantalla.blit(texto_esquina, (self.ancho // 2 - 180, start_y + i * separacion))
             

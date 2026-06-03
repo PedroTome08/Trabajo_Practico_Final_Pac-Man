@@ -24,11 +24,6 @@ class Mapa:
         self.ancho = self.columnas * self.tile
         self.alto  = self.filas * self.tile
     
-    def _es_pared(self, fila, col):
-        if 0 <= fila < self.filas and 0 <= col < self.columnas:
-            return self.grilla[fila][col] == 'X'
-        return False
-
     def dibujar(self, pantalla):
         t = self.tile
         for fila in range(len(self.grilla)):
@@ -66,5 +61,7 @@ class Mapa:
         col = int((x - self.offset_x) // self.tile)
         fil = int((y - self.offset_y) // self.tile)
         
-        #si esta adentro del mapa y no es pared, es pasillo valido
-        return not self._es_pared(fil, col)
+        if 0 <= fil < self.filas and 0 <= col < self.columnas:
+            return self.grilla[fil][col] == 'X'
+        
+        return False #si esta adentro del mapa y no es pared, es pasillo valido

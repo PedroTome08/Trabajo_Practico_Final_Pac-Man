@@ -12,6 +12,11 @@ class PacMan:
         self.abierta = True
         self.velocidad_animacion = 300
         self.moviendose = True
+        
+        #guardo la posicion inicial de pacman para cuando pierde una vida
+        self.x_inicial = x
+        self.y_inicial = y
+        
         pygame.mixer.init()
         pygame.mixer.music.load("src/models/pacman_sound.mp3")
     
