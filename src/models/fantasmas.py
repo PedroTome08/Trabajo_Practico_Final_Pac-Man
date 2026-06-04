@@ -1,28 +1,43 @@
 import pygame
 
 class Fantasma:
-    def __init__(self, x, y, puntaje, velocidad):
+    def __init__(self, x, y, nombre, color, puntaje, velocidad):
         self.x = x
         self.y = y
+        self.nombre = nombre
+        self.color = color
         self.puntaje = puntaje
         self.velocidad = velocidad
         
-    def blinky(self, pantalla):
-        pygame.draw.circle(pantalla, "red", pygame.Vector2(self.x, self.y), 20)
-        #movimiento
-        #el perseguidor. Su tile objetivo en Chase es la posición actual de Pac-Man.
+        self.img_der = pygame.image.load(f"src/models/{nombre.lower()}_der.png").convert_alpha() #metodo de pygame para cargar imagenes de los fantasmas
+        self.img_izq = pygame.image.load(f"src/models/{nombre.lower()}_izq.png").convert_alpha()
+
+        self.img_der = pygame.transform.scale(self.img_der, (38, 38)) #metodo de pygame para ajustar el tamaño de la imagen de los fantasmas
+        self.img_izq = pygame.transform.scale(self.img_izq, (38, 38))
         
-    def pinky(self, pantalla):
-        pygame.draw.circle(pantalla, "pink", pygame.Vector2(self.x, self.y), 20)
-        #movimiento
-        #el emboscador. su tile objetivo en Chase es el tile ubicado 4 posiciones adelante de la dirección actual de Pac-Man. Intenta cortarle el paso por delante.
+        self.direccion = "izq"
         
-    def inky(self, pantalla):
-        pygame.draw.circle(pantalla, "cyan", pygame.Vector2(self.x, self.y), 20)
-        #movimiento
-        #el flanqueador. su tile objetivo se calcula en dos pasos: primero se toma el tile ubicado 2 posiciones adelante de Pac-Man; luego se traza un vector desde la posición de Blinky hasta ese tile y se duplica. Si Blinky no está en la partida, se utiliza al azar alguno de los otros fantasmas.
+    def dibujar_fantasmas(self, pantalla):
+        if self.direccion == "der":
+            pantalla.blit(self.img_der, (self.x, self.y))
+        else:
+            pantalla.blit(self.img_izq, (self.x, self.y))
         
-    def clyde(self, pantalla):
-        pygame.draw.circle(pantalla, "orange", pygame.Vector2(self.x, self.y), 20)
-        #movimiento
-        #el tímido. si su distancia a Pac-Man es mayor a 8 tiles, su target es la posición de Pac-Man. Si está a 8 tiles o menos, su target pasa a ser su esquina de Scatter. Evita acercarse demasiado.
+#cada fantasma hereda los atributos de la clase Fantasma
+class Blinky(Fantasma):
+    pass
+
+class Pinky(Fantasma):
+    pass
+
+class Inky(Fantasma):
+    pass
+
+class Clyde(Fantasma):
+    pass
+
+class Fantasma5(Fantasma):
+    pass
+
+class Fantasma6(Fantasma):
+    pass

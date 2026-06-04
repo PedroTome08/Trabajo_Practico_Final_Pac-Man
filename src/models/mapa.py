@@ -65,6 +65,7 @@ class Mapa:
                     #puerta de la ghost house
                     pygame.draw.line(pantalla, "purple", (x, y + t // 2), (x + t, y + t // 2), 3) #+ t//2 para centrar la linea en el tile
                 elif tile == "P":
+                    pass
                     #posicion inicial de pacman
                     
     def pasillo_pixel(self, x, y):
