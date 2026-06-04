@@ -19,6 +19,9 @@ corriendo = True
 dt = 0
 sonido_iniciado = False
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
+
+pacman = PacMan(x=mapa.pacman_inicio_x, y=mapa.pacman_inicio_y, vidas=3, velocidad=100)
+
 menu = Menu(ANCHO, ALTO)
 col = 13
 fila = 23
@@ -65,7 +68,8 @@ while corriendo:
         elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             pacman.mover("derecha")
         
-        pacman.actualizar(dt, mapa)
+        puntos = pacman.actualizar(dt, mapa)
+        menu.high_score += puntos
         pacman.dibujar(pantalla)
     
     pygame.display.flip()

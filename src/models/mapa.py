@@ -23,6 +23,16 @@ class Mapa:
         self.offset_y = (alto_pantalla - self.filas * self.tile) // 2
         self.ancho = self.columnas * self.tile
         self.alto  = self.filas * self.tile
+        
+        self.pacman_inicio_x = ancho_pantalla // 2
+        self.pacman_inicio_y = alto_pantalla // 2
+
+        for f in range(self.filas):
+            for c in range(self.columnas):
+                if self.grilla[f][c] == "P":
+                    self.pacman_inicio_x = self.offset_x + c * self.tile + self.tile // 2
+                    self.pacman_inicio_y = self.offset_y + f * self.tile + self.tile // 2
+                    self.grilla[f][c] = " " # limpia ese lugar para que no quede basura
     
     def dibujar(self, pantalla):
         t = self.tile
@@ -54,7 +64,7 @@ class Mapa:
                 elif tile == "-":
                     #puerta de la ghost house
                     pygame.draw.line(pantalla, "purple", (x, y + t // 2), (x + t, y + t // 2), 3) #+ t//2 para centrar la linea en el tile
-                #elif tile == "P":
+                elif tile == "P":
                     #posicion inicial de pacman
                     
     def pasillo_pixel(self, x, y):
@@ -65,3 +75,11 @@ class Mapa:
             return self.grilla[fil][col] == 'X'
         
         return False #si esta adentro del mapa y no es pared, es pasillo valido
+
+    def quedas_puntos(self):
+        """CAMBIAR DOCSTRING: Recorre la grilla buscando si todavía queda algún punto o ."""
+        
+        for fila in self.grilla:
+            if "." in fila or "o" in fila:
+                return True # todavía hay comida
+        return False # no hay más comida, el jugador gana

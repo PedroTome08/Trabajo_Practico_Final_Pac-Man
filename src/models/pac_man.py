@@ -20,7 +20,20 @@ class PacMan:
         pygame.mixer.init()
         pygame.mixer.music.load("src/models/pacman_sound.mp3")
     
-    def actualizar(self, dt):
+    def actualizar(self, dt, mapa):
+        puntos_ganados = 0
+        
+        col_actual = int((self.x - mapa.offset_x) // mapa.tile)
+        fila_actual = int((self.y - mapa.offset_y) // mapa.tile)
+        
+        if 0 <= fila_actual < mapa.filas and 0 <= col_actual < mapa.columnas:
+            if mapa.grilla[fila_actual][col_actual] == ".":
+                mapa.grilla[fila_actual][col_actual] = " "
+                puntos_ganados = 10  # Suma 10 por punto normal
+            elif mapa.grilla[fila_actual][col_actual] == "o":
+                mapa.grilla[fila_actual][col_actual] = " "
+                puntos_ganados = 50  # Suma 50 por superpunto
+        
         if self.direccion == "arriba":
             self.y -= self.velocidad * dt
         elif self.direccion == "abajo":
@@ -38,7 +51,17 @@ class PacMan:
             self.anguloBoca -= self.velocidad_animacion * dt
             if self.anguloBoca <= 0:
                 self.abierta = True
-
+        
+        # Si se sale por la izquierda, aparece a la derecha
+        if self.x < mapa.offset_x:
+            self.x = mapa.offset_x + mapa.ancho
+        
+        # Si se sale por la derecha, aparece a la izquierda
+        elif self.x > mapa.offset_x + mapa.ancho:
+            self.x = mapa.offset_x
+        
+        return puntos_ganados
+    
     def mover(self, movimiento):
         self.direccion = movimiento.lower()
 
