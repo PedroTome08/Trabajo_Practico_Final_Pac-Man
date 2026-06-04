@@ -7,11 +7,12 @@ class PacMan:
         self.vidas = vidas
         self.velocidad = velocidad
         self.radio = 10
-        self.direccion = "derecha"
         self.anguloBoca = 0
         self.abierta = True
         self.velocidad_animacion = 300
         self.moviendose = True
+        self.direccion = "derecha"
+        self.direccion_deseada = "derecha"
         
         #guardo la posicion inicial de pacman para cuando pierde una vida
         self.x_inicial = x
@@ -19,6 +20,12 @@ class PacMan:
         
         pygame.mixer.init()
         pygame.mixer.music.load("src/models/pacman_sound.mp3")
+
+    def _choca(self, mapa, x, y):
+        for px, py in [(x + self.radio, y), (x - self.radio, y), (x, y + self.radio), (x, y - self.radio)]:
+            if mapa.pasillo_pixel(px, py):
+                return True
+        return False
     
     def actualizar(self, dt, mapa):
         puntos_ganados = 0
@@ -34,14 +41,29 @@ class PacMan:
                 mapa.grilla[fila_actual][col_actual] = " "
                 puntos_ganados = 50  # Suma 50 por superpunto
         
-        if self.direccion == "arriba":
-            self.y -= self.velocidad * dt
-        elif self.direccion == "abajo":
-            self.y += self.velocidad * dt
-        elif self.direccion == "derecha":
-            self.x += self.velocidad * dt
-        elif self.direccion == "izquierda":
-            self.x -= self.velocidad * dt
+        col = int((self.x - mapa.offset_x) // mapa.tile)
+        fila = int((self.y - mapa.offset_y) // mapa.tile)
+        centro_x = mapa.offset_x + col * mapa.tile + mapa.tile / 2
+        centro_y = mapa.offset_y + fila * mapa.tile + mapa.tile / 2
+
+        margen = self.velocidad * dt + 2
+
+        if self.direccion_deseada != self.direccion:
+            if self.direccion_deseada in ("arriba", "abajo"):
+                _, dy = self._destino(self.direccion_deseada, dt)
+                if abs(self.x - centro_x) <= margen and not self._choca(mapa, centro_x, dy):
+                    self.x = centro_x
+                    self.direccion = self.direccion_deseada
+            else:
+                dx, _ = self._destino(self.direccion_deseada, dt)
+                if abs(self.y - centro_y) <= margen and not self._choca(mapa, dx, centro_y):
+                    self.y = centro_y
+                    self.direccion = self.direccion_deseada
+
+        nuevo_x, nuevo_y = self._destino(self.direccion, dt)
+        if not self._choca(mapa, nuevo_x, nuevo_y):
+            self.x = nuevo_x
+            self.y = nuevo_y
 
         if self.abierta:
             self.anguloBoca += self.velocidad_animacion * dt
@@ -63,7 +85,7 @@ class PacMan:
         return puntos_ganados
     
     def mover(self, movimiento):
-        self.direccion = movimiento.lower()
+        self.direccion_deseada = movimiento.lower()
 
     def dibujar(self, pantalla):
         rotaciones = {
@@ -84,4 +106,15 @@ class PacMan:
         
         pygame.draw.polygon(pantalla, "yellow", puntos)
 
+    def _destino(self, direccion, dt):
+        x, y = self.x, self.y
+        if direccion == "arriba":
+            y -= self.velocidad * dt
+        elif direccion == "abajo":
+            y += self.velocidad * dt
+        elif direccion == "derecha":
+            x += self.velocidad * dt
+        elif direccion == "izquierda":
+            x -= self.velocidad * dt
+        return x, y
     #metodo que le saca la vida
