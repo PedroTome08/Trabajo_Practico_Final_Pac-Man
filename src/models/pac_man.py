@@ -19,7 +19,7 @@ class PacMan:
         self.y_inicial = y
         
         pygame.mixer.init()
-        pygame.mixer.music.load("src/models/pacman_sound.mp3")
+        pygame.mixer.music.load("assets/sounds/pacman_sound.mp3")
 
     def _choca(self, mapa, x, y):
         for px, py in [(x + self.radio, y), (x - self.radio, y), (x, y + self.radio), (x, y - self.radio)]:

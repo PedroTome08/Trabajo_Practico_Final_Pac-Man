@@ -6,18 +6,7 @@ sys.path.append("..")
 from models.pac_man import PacMan
 from models.mapa import Mapa
 from models.menu import Menu
-from models.fantasmas import Fantasma
-from models.pac_man import PacMan
-from models.mapa import Mapa
-from models.menu import Menu
-from models.fantasmas import Fantasma
-from models.fantasmas import Blinky
-from models.fantasmas import Pinky
-from models.fantasmas import Inky
-from models.fantasmas import Clyde
-from models.fantasmas import Fantasma5
-from models.fantasmas import Fantasma6
-from models.estados import Estado
+from models.fantasmas import Blinky, Pinky, Inky, Clyde, Fantasma5, Fantasma6
 from models.estados import Estado
 
 pygame.init()

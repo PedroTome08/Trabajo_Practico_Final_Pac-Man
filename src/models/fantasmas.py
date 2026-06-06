@@ -9,8 +9,8 @@ class Fantasma:
         self.puntaje = puntaje
         self.velocidad = velocidad
         
-        self.img_der = pygame.image.load(f"src/models/{nombre.lower()}_der.png").convert_alpha() #metodo de pygame para cargar imagenes de los fantasmas
-        self.img_izq = pygame.image.load(f"src/models/{nombre.lower()}_izq.png").convert_alpha()
+        self.img_der = pygame.image.load(f"assets/images/{nombre.lower()}_der.png").convert_alpha() #metodo de pygame para cargar imagenes de los fantasmas
+        self.img_izq = pygame.image.load(f"assets/images/{nombre.lower()}_izq.png").convert_alpha()
 
         self.img_der = pygame.transform.scale(self.img_der, (38, 38)) #metodo de pygame para ajustar el tamaño de la imagen de los fantasmas
         self.img_izq = pygame.transform.scale(self.img_izq, (38, 38))
