@@ -27,8 +27,8 @@ blinky = Blinky(x=600, y=300, nombre="Blinky", color="red", puntaje=200, velocid
 pinky = Pinky(x=620, y=300, nombre="Pinky", color="pink", puntaje=200, velocidad=80)
 inky = Inky(x=640, y=300, nombre="Inky", color="cyan", puntaje=200, velocidad=80)
 clyde = Clyde(x=660, y=300, nombre="Clyde", color="orange", puntaje=200, velocidad=80)
-fantasma5 = Fantasma5(x=600, y=330, nombre="Fantasma5", color="green", puntaje=200, velocidad=80)
-fantasma6 = Fantasma6(x=620, y=330, nombre="Fantasma6", color="purple", puntaje=200, velocidad=80)
+jose = Fantasma5(x=600, y=330, nombre="Jose", color="green", puntaje=200, velocidad=80)
+nacho = Fantasma6(x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80)
 
 menu = Menu(ANCHO, ALTO)
 col = 13
@@ -87,8 +87,8 @@ while corriendo:
         pinky.dibujar_fantasmas(pantalla)
         inky.dibujar_fantasmas(pantalla)
         clyde.dibujar_fantasmas(pantalla)
-        fantasma5.dibujar_fantasmas(pantalla)
-        fantasma6.dibujar_fantasmas(pantalla)
+        jose.dibujar_fantasmas(pantalla)
+        nacho.dibujar_fantasmas(pantalla)
     
     pygame.display.flip()
     dt = reloj.tick(60) / 1000

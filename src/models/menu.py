@@ -37,8 +37,8 @@ class Menu:
             {"id": 4, "nombre": "Clyde", "color": (255, 165, 0), "desc": "Naranja - El Tímido"},
             #falta crear los fantasmas 5 y. 6
             #les puse temporalmente el mismo color porque si dejaba el (0, 0, 0) no iban a verse en la pantalla por ser de color negro
-            {"id": 5, "nombre": "Fantasma 5", "color": (255, 255, 255), "desc": "agregar - descripcion"},
-            {"id": 6, "nombre": "Fantasma 6", "color": (255, 255, 255), "desc": "agregar - descripcion"}
+            {"id": 5, "nombre": "José", "color": (34, 139, 34), "desc": "agregar - descripcion"},
+            {"id": 6, "nombre": "Nacho (el mago)", "color": (255, 255, 255), "desc": "agregar - descripcion"}
         ]
         
     def actualizar(self, dt: float):

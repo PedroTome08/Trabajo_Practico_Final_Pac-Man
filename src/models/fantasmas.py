@@ -69,13 +69,15 @@ class Fantasma:
         if self.destino is None:
             self.destino = self.tile_actual(mapa)
         fila_a, col_a = self.tile_actual(mapa)
-        centro_d = self.calcular_centro(self.destino.x,self.destino.y,mapa)
+        centro_d = self.calcular_centro(self.destino[0],self.destino[1],mapa)
         pos_a = pygame.Vector2(self.x,self.y)
         paso = self.velocidad*dt
         if pos_a.distance_to(centro_d) <= paso: #para evitar error acumulado al centrar 
             self.x = centro_d.x
             self.y = centro_d.y  
-            fila_d,col_d = self.destino
+            fila_d = self.destino[0]
+            col_d = self.destino[1]
+            _,_, opuesta= self.vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
             self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d)   
             self.destino = self.vecina(mapa,fila_d,col_d,self.direccion)
         else:
