@@ -82,11 +82,16 @@ while corriendo:
         
         #hago que aparezcan los fantasmas en el juego
         blinky.dibujar_fantasmas(pantalla)
-        
-        blinky.actualizar(dt,mapa)
+        blinky.actualizar(dt,mapa,pacman)
+
         pinky.dibujar_fantasmas(pantalla)
+        pinky.actualizar(dt,mapa,pacman)
+
         inky.dibujar_fantasmas(pantalla)
+        #falta inky 
         clyde.dibujar_fantasmas(pantalla)
+        clyde.actualizar(dt,mapa,pacman)
+
         jose.dibujar_fantasmas(pantalla)
         nacho.dibujar_fantasmas(pantalla)
     

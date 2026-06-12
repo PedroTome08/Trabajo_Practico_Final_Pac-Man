@@ -1,4 +1,5 @@
 import pygame
+DELTAS = {"arriba": (-1, 0), "abajo": (1, 0), "izquierda": (0, -1), "derecha": (0, 1)}
 
 class Fantasma:
     def __init__(self, x, y, nombre, color, puntaje, velocidad):
@@ -17,6 +18,8 @@ class Fantasma:
         
         self.direccion = "izquierda"
         self.destino = None
+
+        self.esquina = (-2,1) #placeholder, cambiar
     def es_pared(self,mapa,col,fila):
         if 0 <= fila < mapa.filas and 0 <= col < mapa.columnas:
             return mapa.grilla[fila][col] == "X"
@@ -30,11 +33,15 @@ class Fantasma:
         fila=int((self.y-mapa.offset_y)//mapa.tile) #redondear para abajo y calcular la columna y filas en la grilla (no en pixeles)
         col=int((self.x-mapa.offset_x)//mapa.tile) 
         return fila,col
+    def tile_dexy(self,x,y,mapa):
+        fila=int((y-mapa.offset_y)// mapa.tile)
+        col=int((x-mapa.offset_x) //mapa.tile)
+        return fila, col
     def calcular_centro(self,fila,col,mapa):
         x=mapa.offset_x +col *mapa.tile +mapa.tile/2
         y= mapa.offset_y +fila *mapa.tile +mapa.tile/2   
         return pygame.Vector2(x, y)
-    def vecina(self,mapa, fila,col,direccion):
+    def direccion_vecina(self,mapa, fila,col,direccion):
         if direccion == "arriba": 
             destino_fila = fila-1
             destino_col = col
@@ -52,20 +59,21 @@ class Fantasma:
             destino_col = col-1
             opuesta = "derecha"
         return destino_fila,destino_col,opuesta
-    def proxima_direccion(self,mapa,opuesta,fila,col):
-        posibles = []
-        for i in ["arriba","abajo","izquierda","derecha"]:
-            df, dc, falsa_o = self.vecina(mapa,fila,col,i)
-            if i == opuesta: continue
-            elif not self.es_pared(mapa,dc,df):
-                posibles.append(i)
-        if self.direccion in posibles:
-            return self.direccion
-        if posibles:    
-            return posibles[0]
-        else: return opuesta   
-                
-    def actualizar(self, dt, mapa):
+    def proxima_direccion(self,mapa,opuesta,fila,col, objetivo): #para cuando llega al objetivo
+        mejor_dist_dir = [None,None]
+        for dir in ["arriba","izquierda","abajo","derecha"]:
+            if dir == opuesta: continue
+            dfil,dcol,_=self.direccion_vecina(mapa,fila,col,dir)
+            if self.es_pared(mapa,dcol,dfil): continue
+            dist=((objetivo[0]-dfil)**2+(objetivo[1]-dcol)**2)**0.5
+            if mejor_dist_dir[0] is None or dist<mejor_dist_dir[0]: 
+                mejor_dist_dir[0]=dist
+                mejor_dist_dir[1]=dir
+        if mejor_dist_dir[0] == None: return opuesta
+        else: return mejor_dist_dir[1]
+    def calcular_objetivo(self, mapa, pacman): #default simple, a reemplazar en cada fantasma, menos en blinky
+        return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
+    def actualizar(self, dt, mapa,pacman):
         if self.destino is None:
             self.destino = self.tile_actual(mapa)
         fila_a, col_a = self.tile_actual(mapa)
@@ -77,9 +85,10 @@ class Fantasma:
             self.y = centro_d.y  
             fila_d = self.destino[0]
             col_d = self.destino[1]
-            _,_, opuesta= self.vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
-            self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d)   
-            self.destino = self.vecina(mapa,fila_d,col_d,self.direccion)
+            _,_, opuesta= self.direccion_vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
+            objetivo = self.calcular_objetivo(mapa,pacman)
+            self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d,objetivo)   
+            self.destino = self.direccion_vecina(mapa,fila_d,col_d,self.direccion)
         else:
             vector_direccion = (centro_d-pos_a).normalize()
             self.x = (pos_a + vector_direccion * paso).x 
@@ -89,14 +98,22 @@ class Blinky(Fantasma):
     pass
 
 class Pinky(Fantasma):
-    pass
+    def calcular_objetivo(self, mapa, pacman):
+        fila,columna = self.tile_dexy(pacman.x,pacman.y,mapa)
+        pacdeltafila, pacdeltacol = DELTAS[pacman.direccion]
+        return (fila + pacdeltafila*4, columna + pacdeltacol*4)
 
 class Inky(Fantasma):
     pass
 
 class Clyde(Fantasma):
-    pass
-
+    def calcular_objetivo(self,mapa,pacman):
+        pacfila,paccol = self.tile_dexy(pacman.x,pacman.y,mapa)
+        ffila, fcol = self.tile_actual(mapa)
+        dist = ((pacfila-ffila)**2+ (paccol-fcol)**2)**0.5
+        if dist >8:
+            return(pacfila,paccol)
+        else: return self.esquina
 class Fantasma5(Fantasma):
     pass
 
