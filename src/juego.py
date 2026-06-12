@@ -62,7 +62,7 @@ while corriendo:
         mapa.dibujar(pantalla)
         
         #actualizo el reloj de los fantasmas
-        estado_global.actualizar(dt)
+        estado_global.actualizar(dt, False)
         
         #que pasa cuando toco las teclas WASD o las flechas del teclado para moverlo
         pacman.moviendose = False
@@ -82,6 +82,8 @@ while corriendo:
         
         #hago que aparezcan los fantasmas en el juego
         blinky.dibujar_fantasmas(pantalla)
+        
+        blinky.actualizar(dt,mapa)
         pinky.dibujar_fantasmas(pantalla)
         inky.dibujar_fantasmas(pantalla)
         clyde.dibujar_fantasmas(pantalla)
