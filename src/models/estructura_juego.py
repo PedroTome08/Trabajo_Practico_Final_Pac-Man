@@ -1,7 +1,8 @@
 import pygame
 from models.estados import Estado
 
-#juego(puntaje, mapa, jugador, fase, fantasmas)
+# juego(puntaje, mapa, jugador, fase, fantasmas)
+
 
 class Juego:
     def __init__(self, puntaje, mapa, jugador, fase, fantasmas):
