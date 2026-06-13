@@ -75,7 +75,7 @@ class Fantasma:
         return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
     def actualizar(self, dt, mapa,pacman):
         if self.destino is None:
-            self.destino = self.tile_actual(mapa)
+            self.destino = (12,12)
         fila_a, col_a = self.tile_actual(mapa)
         centro_d = self.calcular_centro(self.destino[0],self.destino[1],mapa)
         pos_a = pygame.Vector2(self.x,self.y)
@@ -104,7 +104,17 @@ class Pinky(Fantasma):
         return (fila + pacdeltafila*4, columna + pacdeltacol*4)
 
 class Inky(Fantasma):
-    pass
+    def __init__(self, x, y, nombre, color, puntaje, velocidad,compa):
+        super().__init__(x, y, nombre, color, puntaje, velocidad)
+        self.compa = compa
+    def calcular_objetivo(self, mapa, pacman):
+        pass
+        pacfila,paccol = self.tile_dexy(pacman.x,pacman.y,mapa)
+        pacdeltafila, pacdeltacol = DELTAS[pacman.direccion]
+        puntof=pacfila+pacdeltafila*2
+        puntocol = paccol +pacdeltacol*2
+        blinky_f,blinky_col=self.compa.tile_actual(mapa)
+        return (2*puntof-blinky_f,2*puntocol-blinky_col)
 
 class Clyde(Fantasma):
     def calcular_objetivo(self,mapa,pacman):

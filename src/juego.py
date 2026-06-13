@@ -25,7 +25,7 @@ pacman = PacMan(x=mapa.pacman_inicio_x, y=mapa.pacman_inicio_y, vidas=3, velocid
 #fantasmas
 blinky = Blinky(x=600, y=300, nombre="Blinky", color="red", puntaje=200, velocidad=80)
 pinky = Pinky(x=620, y=300, nombre="Pinky", color="pink", puntaje=200, velocidad=80)
-inky = Inky(x=640, y=300, nombre="Inky", color="cyan", puntaje=200, velocidad=80)
+inky = Inky(x=640, y=300, nombre="Inky", color="cyan", puntaje=200, velocidad=80,compa=blinky)
 clyde = Clyde(x=660, y=300, nombre="Clyde", color="orange", puntaje=200, velocidad=80)
 jose = Fantasma5(x=600, y=330, nombre="Jose", color="green", puntaje=200, velocidad=80)
 nacho = Fantasma6(x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80)
@@ -88,7 +88,8 @@ while corriendo:
         pinky.actualizar(dt,mapa,pacman)
 
         inky.dibujar_fantasmas(pantalla)
-        #falta inky 
+        inky.actualizar(dt,mapa,pacman)
+        
         clyde.dibujar_fantasmas(pantalla)
         clyde.actualizar(dt,mapa,pacman)
 
