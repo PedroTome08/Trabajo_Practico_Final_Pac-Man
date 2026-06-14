@@ -76,7 +76,7 @@ while corriendo:
     else:
         if not config_aplicada:
             for nombre in menu.config_final:
-                
+
                 if nombre == "Blinky":
                     fantasmas.append("Blinky")
                 elif nombre == "Pinky":
@@ -89,7 +89,7 @@ while corriendo:
                     fantasmas.append("Jose")
                 elif nombre == "Nacho":
                     fantasmas.append("Nacho")
-            
+
             for fantasma in fantasmas:
                 if fantasma.nombre in menu.config_final:
 
@@ -209,7 +209,7 @@ while corriendo:
         for fantasma in fantasmas:
 
             fantasma.dibujar_fantasmas(pantalla)
-            fantasma.actualizar(dt,mapa,pacman)
+            fantasma.actualizar(dt, mapa, pacman)
 
     pygame.display.flip()
     dt = reloj.tick(60) / 1000

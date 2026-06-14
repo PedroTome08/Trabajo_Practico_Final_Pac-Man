@@ -31,7 +31,7 @@ class Fantasma:
 
     def es_pared(self, mapa, col, fila):
         if 0 <= fila < mapa.filas and 0 <= col < mapa.columnas:
-            return mapa.grilla[fila][col] == "X"
+            return mapa.grilla[fila][col] == "X" or mapa.grilla[fila][col] == "G"
         return True
 
     def dibujar_fantasmas(self, pantalla):
@@ -76,35 +76,30 @@ class Fantasma:
             destino_fila = fila
             destino_col = col - 1
             opuesta = "derecha"
-        return destino_fila, destino_col, opuesta
+        return destino_fila,destino_col,opuesta
+    def proxima_direccion(self,mapa,opuesta,fila,col, objetivo): #para cuando llega al objetivo
+        mejor_dist_dir = [None,None]
+        for dir in ["arriba","izquierda","abajo","derecha"]:
+            if dir == opuesta: continue
+            dfil,dcol,_=self.direccion_vecina(mapa,fila,col,dir)
+            if self.es_pared(mapa,dcol,dfil): continue
+            dist=((objetivo[0]-dfil)**2+(objetivo[1]-dcol)**2)**0.5
+            if mejor_dist_dir[0] is None or dist<mejor_dist_dir[0]: 
+                mejor_dist_dir[0]=dist
+                mejor_dist_dir[1]=dir
+        if mejor_dist_dir[0] == None: return opuesta
+        else: return mejor_dist_dir[1]
+    def calcular_objetivo(self, mapa, pacman): #default simple, a reemplazar en cada fantasma, menos en blinky
+        return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
+    def calcular_inversa(self,mapa):
+        opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"} 
+        self.direccion=opuestas[self.direccion] 
+        fila,columna,_ = self.direccion_vecina(mapa,self.destino[0],self.destino[1],self.direccion) 
+        self.destino=(fila,columna) 
 
-    def proxima_direccion(
-        self, mapa, opuesta, fila, col, objetivo
-    ):  # para cuando llega al objetivo
-        mejor_dist_dir = [None, None]
-        for dir in ["arriba", "izquierda", "abajo", "derecha"]:
-            if dir == opuesta:
-                continue
-            dfil, dcol, _ = self.direccion_vecina(mapa, fila, col, dir)
-            if self.es_pared(mapa, dcol, dfil):
-                continue
-            dist = ((objetivo[0] - dfil) ** 2 + (objetivo[1] - dcol) ** 2) ** 0.5
-            if mejor_dist_dir[0] is None or dist < mejor_dist_dir[0]:
-                mejor_dist_dir[0] = dist
-                mejor_dist_dir[1] = dir
-        if mejor_dist_dir[0] == None:
-            return opuesta
-        else:
-            return mejor_dist_dir[1]
-
-    def calcular_objetivo(
-        self, mapa, pacman
-    ):  # default simple, a reemplazar en cada fantasma, menos en blinky
-        return self.tile_dexy(pacman.x, pacman.y, mapa)
-
-    def actualizar(self, dt, mapa, pacman):
+    def actualizar(self, dt, mapa,pacman,modo):
         if self.destino is None:
-            self.destino = (12, 12)
+            self.destino = (10,12)
         fila_a, col_a = self.tile_actual(mapa)
         centro_d = self.calcular_centro(self.destino[0], self.destino[1], mapa)
         pos_a = pygame.Vector2(self.x, self.y)
@@ -116,14 +111,11 @@ class Fantasma:
             self.y = centro_d.y
             fila_d = self.destino[0]
             col_d = self.destino[1]
-            _, _, opuesta = self.direccion_vecina(
-                mapa, fila_d, col_d, self.direccion
-            )  # el _ porque no nos importa
-            objetivo = self.calcular_objetivo(mapa, pacman)
-            self.direccion = self.proxima_direccion(
-                mapa, opuesta, fila_d, col_d, objetivo
-            )
-            self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)
+            _,_, opuesta= self.direccion_vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
+            if modo == "SCATTER": objetivo = self.esquina
+            else: objetivo = self.calcular_objetivo(mapa,pacman)
+            self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d,objetivo)   
+            self.destino = self.direccion_vecina(mapa,fila_d,col_d,self.direccion)
         else:
             vector_direccion = (centro_d - pos_a).normalize()
             self.x = (pos_a + vector_direccion * paso).x
