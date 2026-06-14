@@ -29,8 +29,21 @@ class PacMan:
             (x, y + self.radio),
             (x, y - self.radio),
         ]:
+
+            col = int((px - mapa.offset_x) // mapa.tile)
+            fil = int((py - mapa.offset_y) // mapa.tile)
+
+            print(
+                "px=", px,
+                "py=", py,
+                "fila=", fil,
+                "col=", col,
+                "valor=", mapa.grilla[fil][col]
+            )
+
             if mapa.pasillo_pixel(px, py):
                 return True
+        
         return False
 
     def actualizar(self, dt, mapa):

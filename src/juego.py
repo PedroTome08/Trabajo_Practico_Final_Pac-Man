@@ -24,7 +24,12 @@ sonido_iniciado = False
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
 menu = Menu(ANCHO, ALTO)
 
-pacman = PacMan(x=mapa.pacman_inicio_x, y=mapa.pacman_inicio_y, vidas=3, velocidad=100)
+pacman = PacMan(
+    x=mapa.pacman_inicio_x,
+    y=mapa.pacman_inicio_y,
+    vidas=3,
+    velocidad=100,
+)
 
 # fantasmas
 blinky = Blinky(x=600, y=300, nombre="Blinky", color="red", puntaje=200, velocidad=80)
@@ -43,11 +48,12 @@ fantasmas: list[Fantasma] = []
 col = 13
 fila = 23
 pacman = PacMan(
-    x=mapa.offset_x + col * mapa.tile + mapa.tile / 2,
-    y=mapa.offset_y + fila * mapa.tile + mapa.tile / 2,
+    x=mapa.pacman_inicio_x,
+    y=mapa.pacman_inicio_y,
     vidas=3,
     velocidad=100,
 )
+
 estado_global = Estado()
 config_aplicada = False
 score = 0
@@ -68,6 +74,57 @@ INVERSA = {
     "izquierda": "derecha",
     "derecha": "izquierda",
 }
+
+nivel = 1
+
+fuente_hud = pygame.font.SysFont("Courier New", 28)
+
+def dibujar_hud(pantalla, score, high_score, nivel, vidas):
+
+    pygame.draw.rect(
+        pantalla,
+        (20, 20, 20),
+        (0, ALTO - 80, ANCHO, 80)
+    )
+
+    pygame.draw.line(
+        pantalla,
+        (80, 80, 80),
+        (0, ALTO - 80),
+        (ANCHO, ALTO - 80),
+        2
+    )
+
+    texto_score = fuente_hud.render(
+        f"SCORE: {score}",
+        True,
+        (255,255,255)
+    )
+
+    texto_high = fuente_hud.render(
+        f"HIGH SCORE: {high_score}",
+        True,
+        (255,255,255)
+    )
+
+    texto_nivel = fuente_hud.render(
+        f"LEVEL: {nivel}",
+        True,
+        (255,255,255)
+    )
+
+    pantalla.blit(texto_score, (20, ALTO - 55))
+    pantalla.blit(texto_high, (350, ALTO - 55))
+    pantalla.blit(texto_nivel, (800, ALTO - 55))
+
+    for i in range(vidas):
+        pygame.draw.circle(
+            pantalla,
+            "yellow",
+            (1150 + i * 30, ALTO - 40),
+            12
+        )
+
 
 while corriendo:
     # acá se almacenan los movimientos
@@ -162,8 +219,8 @@ while corriendo:
                 col = 13
                 fila = 23
                 pacman = PacMan(
-                    x=mapa.offset_x + col * mapa.tile + mapa.tile / 2,
-                    y=mapa.offset_y + fila * mapa.tile + mapa.tile / 2,
+                    x=mapa.pacman_inicio_x,
+                    y=mapa.pacman_inicio_y,
                     vidas=3,
                     velocidad=100,
                 )
@@ -259,7 +316,11 @@ while corriendo:
                 pacman.mover("derecha")
 
             puntos, power_pellet = pacman.actualizar(dt, mapa)
-            menu.high_score += puntos
+            
+            score += puntos
+            
+            if score > menu.high_score:
+                menu.high_score = score
 
             if power_pellet:
 
@@ -300,6 +361,14 @@ while corriendo:
                 fantasma.dibujar_fantasmas(pantalla)
                 fantasma.actualizar(dt, mapa, pacman, modo)
 
+            dibujar_hud(
+                pantalla,
+                score,
+                menu.high_score,
+                nivel,
+                pacman.vidas
+            )
+            
     pygame.display.flip()
     dt = reloj.tick(60) / 1000
 

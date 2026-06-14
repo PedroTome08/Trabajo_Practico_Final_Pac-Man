@@ -18,9 +18,24 @@ class Mapa:
 
         self.columnas = ancho_maximo
         self.filas = len(self.grilla)
-        self.tile = min(ancho_pantalla // self.columnas, alto_pantalla // self.filas)
-        self.offset_x = (ancho_pantalla - self.columnas * self.tile) // 2
-        self.offset_y = (alto_pantalla - self.filas * self.tile) // 2
+        
+        HUD_ALTURA = 80
+
+        self.tile = min(
+            ancho_pantalla // self.columnas,
+            (alto_pantalla - HUD_ALTURA) // self.filas
+        )
+
+        self.offset_x = (
+            ancho_pantalla - self.columnas * self.tile
+        ) // 2
+
+        self.offset_y = (
+            (alto_pantalla - HUD_ALTURA)
+            - self.filas * self.tile
+        ) // 2
+        
+        
         self.ancho = self.columnas * self.tile
         self.alto = self.filas * self.tile
 
