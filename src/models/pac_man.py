@@ -6,7 +6,7 @@ class PacMan:
         self.y = y
         self.vidas = vidas
         self.velocidad = velocidad
-        self.radio = 10
+        self.radio = 9
         self.anguloBoca = 0
         self.abierta = True
         self.velocidad_animacion = 300
@@ -20,27 +20,15 @@ class PacMan:
         self.y_inicial = y
 
         pygame.mixer.init()
-        pygame.mixer.music.load("assets/sounds/pacman_sonidoPosta.mp3")
-
+        self.sonido_comer = pygame.mixer.Sound("assets/sounds/wakawaka.mp3")
     def _choca(self, mapa, x, y):
+        r = self.radio
         for px, py in [
-            (x + self.radio, y),
-            (x - self.radio, y),
-            (x, y + self.radio),
-            (x, y - self.radio),
+            (x + r, y),
+            (x - r, y),
+            (x, y + r),
+            (x, y - r),
         ]:
-
-            col = int((px - mapa.offset_x) // mapa.tile)
-            fil = int((py - mapa.offset_y) // mapa.tile)
-
-            print(
-                "px=", px,
-                "py=", py,
-                "fila=", fil,
-                "col=", col,
-                "valor=", mapa.grilla[fil][col]
-            )
-
             if mapa.pasillo_pixel(px, py):
                 return True
         
@@ -57,6 +45,8 @@ class PacMan:
             if mapa.grilla[fila_actual][col_actual] == ".":
                 mapa.grilla[fila_actual][col_actual] = " "
                 puntos_ganados = 10  #suma 10 por punto normal
+                if self.sonido_comer.get_num_channels() == 0:
+                    self.sonido_comer.play()
             elif mapa.grilla[fila_actual][col_actual] == "o":
                 mapa.grilla[fila_actual][col_actual] = " "
                 puntos_ganados = 50 #suma 50 por superpunto
@@ -146,12 +136,10 @@ class PacMan:
     #metodo que le saca la vida
     def perder_vida(self):
         self.vidas -= 1
-
-    #vuelve a la posicion inicial
+        #vuelve a la posicion inicial
         self.x = self.x_inicial
         self.y = self.y_inicial
-
-    #reinicia direccion
+        #reinicia direccion
         self.direccion = "derecha"
         self.direccion_deseada = "derecha"
 

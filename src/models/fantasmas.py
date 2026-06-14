@@ -16,25 +16,13 @@ class Fantasma:
         self.muerto = False
         self.saliendo_casa = False
 
-        self.img_der = pygame.image.load(
-            f"assets/images/{nombre.lower()}_der.png"
-        ).convert_alpha()  # metodo de pygame para cargar imagenes de los fantasmas
-        self.img_izq = pygame.image.load(
-            f"assets/images/{nombre.lower()}_izq.png"
-        ).convert_alpha()
-
-        self.img_der = pygame.transform.scale(
-            self.img_der, (38, 38)
-        )  # metodo de pygame para ajustar el tamaño de la imagen de los fantasmas
-        self.img_izq = pygame.transform.scale(self.img_izq, (38, 38))
-
+        self.img_der = self.imagen(f"assets/images/{nombre.lower()}_der.png", 24)
+        self.img_izq = self.imagen(f"assets/images/{nombre.lower()}_izq.png", 24)
+        self.img_asustado = self.imagen("assets/images/asustado.png", 24)
+        self.img_muerto = self.imagen("assets/images/ojosfantasmas.webp", 24)
         self.direccion = "izquierda"
         self.destino = None
-
         self.esquina = (-2, 1)  # placeholder, cambiar
-        
-        self.img_asustado = pygame.image.load("assets/images/asustado.png").convert_alpha()
-        self.img_asustado = pygame.transform.scale(self.img_asustado, (38,38))
 
     def es_pared(self, mapa, col, fila):
         if not (0 <= fila < mapa.filas and 0 <= col < mapa.columnas):
@@ -43,24 +31,32 @@ class Fantasma:
         celda = mapa.grilla[fila][col]
 
         #si esta muerto puede entrar a la ghost house
-        if self.muerto:
+        if self.muerto or self.saliendo_casa:
+            en_casa = 11 <= fila <= 16 and 9 <= col <= 18
+            if celda == " " and not en_casa:
+                return True
             return celda == "X"
 
         return celda == "X" or celda == "G"
 
-    def dibujar_fantasmas(self, pantalla):
-        if self.direccion == "derecha":
-            pantalla.blit(self.img_der, (self.x - 19, self.y - 19))  # -19 por el sprite de 38x38 (/2=19) para que quede centrado
-        
-        if self.asustado:
-            pantalla.blit(self.img_asustado, (self.x - 19, self.y - 19))
-            return
+    def imagen(self, ruta, tamaño):
+        img = pygame.image.load(ruta).convert_alpha()
+        rect = img.get_bounding_rect()
+        img = img.subsurface(rect).copy()
+        escala = tamaño / max(rect.width, rect.height)
+        nuevo = (int(rect.width * escala), int(rect.height * escala))
+        return pygame.transform.scale(img, nuevo)
 
-        if self.direccion == "derecha":
-            pantalla.blit(self.img_der, (self.x - 19, self.y - 19))
-        
+    def dibujar_fantasmas(self, pantalla):
+        if self.muerto:
+            img = self.img_muerto
+        elif self.asustado:
+            img = self.img_asustado
+        elif self.direccion == "derecha":
+            img = self.img_der
         else:
-            pantalla.blit(self.img_izq, (self.x - 19, self.y - 19))
+            img = self.img_izq
+        pantalla.blit(img, (self.x - img.get_width() / 2, self.y - img.get_height() / 2))
             
     def activar_asustado(self, duracion=8):
         self.asustado = True
@@ -107,6 +103,11 @@ class Fantasma:
             destino_fila = fila
             destino_col = col - 1
             opuesta = "derecha"
+        else:
+            # direccion invalida (ej: camino_a devolvio None): me quedo donde estoy
+            destino_fila = fila
+            destino_col = col
+            opuesta = None
         return destino_fila,destino_col,opuesta
     
     def proxima_direccion(self,mapa,opuesta,fila,col, objetivo): #para cuando llega al objetivo
@@ -152,6 +153,33 @@ class Fantasma:
         fila,columna,_ = self.direccion_vecina(mapa,self.destino[0],self.destino[1],self.direccion) 
         self.destino=(fila,columna) 
 
+    def camino_a(self, mapa, inicio, objetivo):
+        cola = [inicio]
+        vino_de = {inicio: None}
+        while cola:
+            actual = cola.pop(0)
+            if actual == objetivo:
+                break
+            fila, col = actual
+            for direccion in ["arriba", "abajo", "izquierda", "derecha"]:
+                dfil, dcol, _ = self.direccion_vecina(mapa, fila, col, direccion)
+                vecino = (dfil, dcol)
+                if vecino in vino_de or self.es_pared(mapa, dcol, dfil):
+                    continue
+                vino_de[vecino] = (actual, direccion)
+                cola.append(vecino)
+        if inicio == objetivo:
+            return self.direccion
+        if objetivo not in vino_de:
+            return self.direccion
+        paso = objetivo
+        primera = None
+        while vino_de[paso] is not None:
+            anterior, direccion = vino_de[paso]
+            primera = direccion
+            paso = anterior
+        return primera
+
     def actualizar(self, dt, mapa, pacman, modo):
         self.actualizar_asustado(dt)
         if self.destino is None:
@@ -170,19 +198,16 @@ class Fantasma:
             _,_, opuesta= self.direccion_vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
             
             if self.muerto:
-                objetivo = (14, 13)   # centro de la ghost house
-                self.direccion = self.proxima_direccion(mapa, opuesta, fila_d, col_d, objetivo)
+                objetivo = (14, 13)
+                self.direccion = self.camino_a(mapa, (fila_d, col_d), objetivo)
                 self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
-
                 if (fila_d, col_d) == objetivo:
                     self.muerto = False
                     self.saliendo_casa = True
-
                 return
-            
             if self.saliendo_casa:
                 salida = (11, 13)
-                self.direccion = self.proxima_direccion(mapa, opuesta, fila_d, col_d, salida)
+                self.direccion = self.camino_a(mapa, (fila_d, col_d), salida)
                 self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
 
                 if (fila_d, col_d) == salida:
@@ -225,7 +250,6 @@ class Inky(Fantasma):
         self.compa = compa
 
     def calcular_objetivo(self, mapa, pacman):
-        pass
         pacfila, paccol = self.tile_dexy(pacman.x, pacman.y, mapa)
         pacdeltafila, pacdeltacol = DELTAS[pacman.direccion]
         puntof = pacfila + pacdeltafila * 2

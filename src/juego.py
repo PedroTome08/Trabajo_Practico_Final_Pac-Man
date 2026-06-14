@@ -12,7 +12,7 @@ from models.estados import Estado
 from utils.game_over import dibujar_game_over
 
 pygame.init()
-
+sonido_asustado = pygame.mixer.Sound("assets/sounds/modoAsustado.mp3")
 DURACION_GAME_OVER_MS = 2000
 ANCHO, ALTO = 1280, 720
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
@@ -164,9 +164,6 @@ while corriendo:
 
             config_aplicada = True
 
-        if not sonido_iniciado:
-            pygame.mixer.music.play(-1)
-            sonido_iniciado = True
 
         # color de la pantalla
         pantalla.fill("black")
@@ -212,6 +209,7 @@ while corriendo:
                 game_over_inicio = None
                 config_aplicada = False
                 sonido_iniciado = False
+                score = 0
                 fantasmas.clear()
 
                 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
@@ -323,7 +321,7 @@ while corriendo:
                 menu.high_score = score
 
             if power_pellet:
-
+                sonido_asustado.play(-1)  # loop mientras dura el modo
                 for fantasma in fantasmas:
                     fantasma.activar_asustado()
                     fantasma.direccion = INVERSA[fantasma.direccion]
@@ -335,6 +333,8 @@ while corriendo:
             for fantasma in fantasmas:
 
                 if pacman.colisionar(fantasma):
+                    if fantasma.muerto:
+                        continue
 
                     if fantasma.asustado:
                         menu.high_score += fantasma.puntaje
@@ -360,6 +360,9 @@ while corriendo:
 
                 fantasma.dibujar_fantasmas(pantalla)
                 fantasma.actualizar(dt, mapa, pacman, modo)
+
+            if not any(f.asustado for f in fantasmas):
+                sonido_asustado.stop()
 
             dibujar_hud(
                 pantalla,
