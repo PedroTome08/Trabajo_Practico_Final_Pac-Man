@@ -6,11 +6,14 @@ sys.path.append("..")
 from models.pac_man import PacMan
 from models.mapa import Mapa
 from models.menu import Menu
-from models.fantasmas import Blinky, Pinky, Inky, Clyde, Fantasma5, Fantasma6
+from models.fantasmas import Fantasma, Blinky, Pinky, Inky, Clyde, Fantasma5, Fantasma6
 from models.estados import Estado
+
+from utils.game_over import dibujar_game_over
 
 pygame.init()
 
+DURACION_GAME_OVER_MS = 2000
 ANCHO, ALTO = 1280, 720
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 reloj = pygame.time.Clock()
@@ -35,7 +38,7 @@ nacho = Fantasma6(
     x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80
 )
 
-fantasmas = []
+fantasmas: list[Fantasma] = []
 
 col = 13
 fila = 23
@@ -50,6 +53,7 @@ config_aplicada = False
 score = 0
 game_over = False
 victoria = False
+game_over_inicio = None
 
 ESQUINAS = {
     "Superior Izquierda": (0, 0),
@@ -78,17 +82,17 @@ while corriendo:
             for nombre in menu.config_final:
 
                 if nombre == "Blinky":
-                    fantasmas.append("Blinky")
+                    fantasmas.append(blinky)
                 elif nombre == "Pinky":
-                    fantasmas.append("Pinky")
+                    fantasmas.append(pinky)
                 elif nombre == "Inky":
-                    fantasmas.append("Inky")
+                    fantasmas.append(inky)
                 elif nombre == "Clyde":
-                    fantasmas.append("Clyde")
+                    fantasmas.append(clyde)
                 elif nombre == "Jose":
-                    fantasmas.append("Jose")
+                    fantasmas.append(jose)
                 elif nombre == "Nacho":
-                    fantasmas.append("Nacho")
+                    fantasmas.append(nacho)
 
             for fantasma in fantasmas:
                 if fantasma.nombre in menu.config_final:
@@ -107,9 +111,6 @@ while corriendo:
         # dibujo el mapa y el pacman
         mapa.dibujar(pantalla)
 
-        # actualizo el reloj de los fantasmas
-        estado_global.actualizar(dt, False)
-
         # victoria y game over
 
         if not pacman.esta_vivo():
@@ -121,18 +122,93 @@ while corriendo:
         # pantalla game over
 
         if game_over:
+            if game_over_inicio is None:
+                game_over_inicio = pygame.time.get_ticks()
 
-            fuente = pygame.font.SysFont("Courier New", 72, bold=True)
+            # Dibujo la escena congelada
+            pacman.dibujar(pantalla)
 
-            texto = fuente.render("GAME OVER", True, (255, 0, 0))
+            for fantasma in fantasmas:
+                fantasma.dibujar_fantasmas(pantalla)
 
-            pantalla.blit(
-                texto,
-                (
-                    ANCHO // 2 - texto.get_width() // 2,
-                    ALTO // 2 - texto.get_height() // 2,
-                ),
-            )
+            # Dibujo overlay lindo encima
+            dibujar_game_over(pantalla, menu.high_score, ANCHO, ALTO)
+
+            # Después de 2 segundos vuelvo al menú
+            if pygame.time.get_ticks() - game_over_inicio >= DURACION_GAME_OVER_MS:
+                pygame.mixer.music.stop()
+                
+                menu.estado = "INICIO"
+
+                game_over = False
+                victoria = False
+                game_over_inicio = None
+                config_aplicada = False
+                sonido_iniciado = False
+                fantasmas.clear()
+
+                mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
+
+                col = 13
+                fila = 23
+                pacman = PacMan(
+                    x=mapa.offset_x + col * mapa.tile + mapa.tile / 2,
+                    y=mapa.offset_y + fila * mapa.tile + mapa.tile / 2,
+                    vidas=3,
+                    velocidad=100,
+                )
+
+                blinky = Blinky(
+                    x=600,
+                    y=300,
+                    nombre="Blinky",
+                    color="red",
+                    puntaje=200,
+                    velocidad=80,
+                )
+                pinky = Pinky(
+                    x=620,
+                    y=300,
+                    nombre="Pinky",
+                    color="pink",
+                    puntaje=200,
+                    velocidad=80,
+                )
+                inky = Inky(
+                    x=640,
+                    y=300,
+                    nombre="Inky",
+                    color="cyan",
+                    puntaje=200,
+                    velocidad=80,
+                    compa=blinky,
+                )
+                clyde = Clyde(
+                    x=660,
+                    y=300,
+                    nombre="Clyde",
+                    color="orange",
+                    puntaje=200,
+                    velocidad=80,
+                )
+                jose = Fantasma5(
+                    x=600,
+                    y=330,
+                    nombre="Jose",
+                    color="green",
+                    puntaje=200,
+                    velocidad=80,
+                )
+                nacho = Fantasma6(
+                    x=620,
+                    y=330,
+                    nombre="Nacho_(el mago)",
+                    color="white",
+                    puntaje=200,
+                    velocidad=80,
+                )
+
+                estado_global = Estado()
 
         # pantalla victoria
 
@@ -153,6 +229,8 @@ while corriendo:
         # juego normal
 
         else:
+            # actualizo el reloj de los fantasmas
+            estado_global.actualizar(dt, False)
 
             pacman.moviendose = False
 
@@ -184,32 +262,20 @@ while corriendo:
                     pacman.perder_vida()
                     break
 
-        # que pasa cuando toco las teclas WASD o las flechas del teclado para moverlo
-        pacman.moviendose = False
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
-            pacman.mover("arriba")
-        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            pacman.mover("abajo")
-        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            pacman.mover("izquierda")
-        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            pacman.mover("derecha")
+            # TODO: PREGUNTAR PARA QUE SE USABA
+            """modo = estado_global.obtener_modo()
+            cambio = estado_global.actualizar(dt, False)
+            if cambio:
+                for i in (blinky,pinky,inky,clyde):
+                    i.calcular_inversa(mapa)"""
 
-        puntos = pacman.actualizar(dt, mapa)
-        menu.high_score += puntos
-        pacman.dibujar(pantalla)
+            modo = estado_global.obtener_modo()
 
-        for fantasma in fantasmas:
-            if pacman.colisionar(fantasma):
-                pacman.perder_vida()
-                break
+            # hago que aparezcan los fantasmas en el juego
+            for fantasma in fantasmas:
 
-        # hago que aparezcan los fantasmas en el juego
-        for fantasma in fantasmas:
-
-            fantasma.dibujar_fantasmas(pantalla)
-            fantasma.actualizar(dt, mapa, pacman)
+                fantasma.dibujar_fantasmas(pantalla)
+                fantasma.actualizar(dt, mapa, pacman, modo)
 
     pygame.display.flip()
     dt = reloj.tick(60) / 1000
