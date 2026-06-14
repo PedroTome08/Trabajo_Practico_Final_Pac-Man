@@ -145,5 +145,3 @@ class PacMan:
     def colisionar(self, fantasma):
         distancia = ((self.x - fantasma.x) ** 2 + (self.y - fantasma.y) ** 2) ** 0.5
         return distancia < self.radio + 15
-    
-    

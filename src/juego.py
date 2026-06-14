@@ -19,6 +19,7 @@ corriendo = True
 dt = 0
 sonido_iniciado = False
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
+menu = Menu(ANCHO, ALTO)
 
 pacman = PacMan(x=mapa.pacman_inicio_x, y=mapa.pacman_inicio_y, vidas=3, velocidad=100)
 
@@ -34,9 +35,8 @@ nacho = Fantasma6(
     x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80
 )
 
-fantasmas = [blinky, pinky, inky, clyde, jose, nacho]
+fantasmas = []
 
-menu = Menu(ANCHO, ALTO)
 col = 13
 fila = 23
 pacman = PacMan(
@@ -46,6 +46,18 @@ pacman = PacMan(
     velocidad=100,
 )
 estado_global = Estado()
+config_aplicada = False
+score = 0
+game_over = False
+victoria = False
+
+ESQUINAS = {
+    "Superior Izquierda": (0, 0),
+    "Superior Derecha": (0, mapa.columnas - 1),
+    "Inferior Izquierda": (mapa.filas - 1, 0),
+    "Inferior Derecha": (mapa.filas - 1, mapa.columnas - 1),
+}
+
 
 while corriendo:
     # acá se almacenan los movimientos
@@ -62,6 +74,29 @@ while corriendo:
         menu.dibujar(pantalla)
 
     else:
+        if not config_aplicada:
+            for nombre in menu.config_final:
+                
+                if nombre == "Blinky":
+                    fantasmas.append("Blinky")
+                elif nombre == "Pinky":
+                    fantasmas.append("Pinky")
+                elif nombre == "Inky":
+                    fantasmas.append("Inky")
+                elif nombre == "Clyde":
+                    fantasmas.append("Clyde")
+                elif nombre == "Jose":
+                    fantasmas.append("Jose")
+                elif nombre == "Nacho":
+                    fantasmas.append("Nacho")
+            
+            for fantasma in fantasmas:
+                if fantasma.nombre in menu.config_final:
+
+                    fantasma.esquina = ESQUINAS[menu.config_final[fantasma.nombre]]
+
+            config_aplicada = True
+
         if not sonido_iniciado:
             pygame.mixer.music.play(-1)
             sonido_iniciado = True
@@ -74,6 +109,80 @@ while corriendo:
 
         # actualizo el reloj de los fantasmas
         estado_global.actualizar(dt, False)
+
+        # victoria y game over
+
+        if not pacman.esta_vivo():
+            game_over = True
+
+        if not mapa.quedas_puntos():
+            victoria = True
+
+        # pantalla game over
+
+        if game_over:
+
+            fuente = pygame.font.SysFont("Courier New", 72, bold=True)
+
+            texto = fuente.render("GAME OVER", True, (255, 0, 0))
+
+            pantalla.blit(
+                texto,
+                (
+                    ANCHO // 2 - texto.get_width() // 2,
+                    ALTO // 2 - texto.get_height() // 2,
+                ),
+            )
+
+        # pantalla victoria
+
+        elif victoria:
+
+            fuente = pygame.font.SysFont("Courier New", 72, bold=True)
+
+            texto = fuente.render("YOU WIN!", True, (255, 255, 0))
+
+            pantalla.blit(
+                texto,
+                (
+                    ANCHO // 2 - texto.get_width() // 2,
+                    ALTO // 2 - texto.get_height() // 2,
+                ),
+            )
+
+        # juego normal
+
+        else:
+
+            pacman.moviendose = False
+
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_w] or keys[pygame.K_UP]:
+                pacman.mover("arriba")
+
+            elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+                pacman.mover("abajo")
+
+            elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                pacman.mover("izquierda")
+
+            elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                pacman.mover("derecha")
+
+            puntos = pacman.actualizar(dt, mapa)
+
+            menu.high_score += puntos
+
+            pacman.dibujar(pantalla)
+
+            # colisiones
+
+            for fantasma in fantasmas:
+
+                if pacman.colisionar(fantasma):
+                    pacman.perder_vida()
+                    break
 
         # que pasa cuando toco las teclas WASD o las flechas del teclado para moverlo
         pacman.moviendose = False
@@ -90,27 +199,17 @@ while corriendo:
         puntos = pacman.actualizar(dt, mapa)
         menu.high_score += puntos
         pacman.dibujar(pantalla)
-        
+
         for fantasma in fantasmas:
             if pacman.colisionar(fantasma):
                 pacman.perder_vida()
                 break
 
         # hago que aparezcan los fantasmas en el juego
-        blinky.dibujar_fantasmas(pantalla)
-        blinky.actualizar(dt, mapa, pacman)
+        for fantasma in fantasmas:
 
-        pinky.dibujar_fantasmas(pantalla)
-        pinky.actualizar(dt, mapa, pacman)
-
-        inky.dibujar_fantasmas(pantalla)
-        inky.actualizar(dt, mapa, pacman)
-
-        clyde.dibujar_fantasmas(pantalla)
-        clyde.actualizar(dt, mapa, pacman)
-
-        jose.dibujar_fantasmas(pantalla)
-        nacho.dibujar_fantasmas(pantalla)
+            fantasma.dibujar_fantasmas(pantalla)
+            fantasma.actualizar(dt,mapa,pacman)
 
     pygame.display.flip()
     dt = reloj.tick(60) / 1000

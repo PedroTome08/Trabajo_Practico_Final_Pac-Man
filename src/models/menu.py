@@ -13,6 +13,7 @@ class Menu:
 
         # con estado me refiero a las pantallas (la de inicio, la de selección de fantasmas, la de seleccion de las esquinas y menu terminado)
         self.estado = "INICIO"
+        self.score = 0
         self.high_score = 0
 
         # fuentes del texto en distintos tamaños
@@ -257,3 +258,4 @@ class Menu:
             pantalla.blit(
                 texto_esquina, (self.ancho // 2 - 180, start_y + i * separacion)
             )
+

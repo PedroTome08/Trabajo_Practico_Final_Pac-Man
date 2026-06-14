@@ -167,10 +167,8 @@ class Clyde(Fantasma):
         else:
             return self.esquina
 
-
 class Fantasma5(Fantasma):
     pass
-
 
 class Fantasma6(Fantasma):
     pass
