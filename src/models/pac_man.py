@@ -13,6 +13,7 @@ class PacMan:
         self.moviendose = True
         self.direccion = "derecha"
         self.direccion_deseada = "derecha"
+        power_pellet = False
 
         # guardo la posicion inicial de pacman para cuando pierde una vida
         self.x_inicial = x
@@ -34,6 +35,7 @@ class PacMan:
 
     def actualizar(self, dt, mapa):
         puntos_ganados = 0
+        power_pellet = False
 
         col_actual = int((self.x - mapa.offset_x) // mapa.tile)
         fila_actual = int((self.y - mapa.offset_y) // mapa.tile)
@@ -41,10 +43,11 @@ class PacMan:
         if 0 <= fila_actual < mapa.filas and 0 <= col_actual < mapa.columnas:
             if mapa.grilla[fila_actual][col_actual] == ".":
                 mapa.grilla[fila_actual][col_actual] = " "
-                puntos_ganados = 10  # Suma 10 por punto normal
+                puntos_ganados = 10  #suma 10 por punto normal
             elif mapa.grilla[fila_actual][col_actual] == "o":
                 mapa.grilla[fila_actual][col_actual] = " "
-                puntos_ganados = 50  # Suma 50 por superpunto
+                puntos_ganados = 50 #suma 50 por superpunto
+                power_pellet = True 
 
         col = int((self.x - mapa.offset_x) // mapa.tile)
         fila = int((self.y - mapa.offset_y) // mapa.tile)
@@ -83,15 +86,15 @@ class PacMan:
             if self.anguloBoca <= 0:
                 self.abierta = True
 
-        # Si se sale por la izquierda, aparece a la derecha
+        #si se sale por la izquierda, aparece a la derecha
         if self.x < mapa.offset_x:
             self.x = mapa.offset_x + mapa.ancho
 
-        # Si se sale por la derecha, aparece a la izquierda
+        #si se sale por la derecha, aparece a la izquierda
         elif self.x > mapa.offset_x + mapa.ancho:
             self.x = mapa.offset_x
 
-        return puntos_ganados
+        return puntos_ganados, power_pellet
 
     def mover(self, movimiento):
         self.direccion_deseada = movimiento.lower()

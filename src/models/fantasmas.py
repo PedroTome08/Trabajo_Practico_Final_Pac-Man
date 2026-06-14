@@ -1,7 +1,7 @@
 import pygame
+import random
 
 DELTAS = {"arriba": (-1, 0), "abajo": (1, 0), "izquierda": (0, -1), "derecha": (0, 1)}
-
 
 class Fantasma:
     def __init__(self, x, y, nombre, color, puntaje, velocidad):
@@ -11,6 +11,10 @@ class Fantasma:
         self.color = color
         self.puntaje = puntaje
         self.velocidad = velocidad
+        self.asustado = False
+        self.tiempo_asustado = 0
+        self.muerto = False
+        self.saliendo_casa = False
 
         self.img_der = pygame.image.load(
             f"assets/images/{nombre.lower()}_der.png"
@@ -28,19 +32,46 @@ class Fantasma:
         self.destino = None
 
         self.esquina = (-2, 1)  # placeholder, cambiar
+        
+        self.img_asustado = pygame.image.load("assets/images/asustado.png").convert_alpha()
+        self.img_asustado = pygame.transform.scale(self.img_asustado, (38,38))
 
     def es_pared(self, mapa, col, fila):
-        if 0 <= fila < mapa.filas and 0 <= col < mapa.columnas:
-            return mapa.grilla[fila][col] == "X" or mapa.grilla[fila][col] == "G"
-        return True
+        if not (0 <= fila < mapa.filas and 0 <= col < mapa.columnas):
+            return True
+
+        celda = mapa.grilla[fila][col]
+
+        #si esta muerto puede entrar a la ghost house
+        if self.muerto:
+            return celda == "X"
+
+        return celda == "X" or celda == "G"
 
     def dibujar_fantasmas(self, pantalla):
         if self.direccion == "derecha":
-            pantalla.blit(
-                self.img_der, (self.x - 19, self.y - 19)
-            )  # -19 por el sprite de 38x38 (/2=19) para que quede centrado
+            pantalla.blit(self.img_der, (self.x - 19, self.y - 19))  # -19 por el sprite de 38x38 (/2=19) para que quede centrado
+        
+        if self.asustado:
+            pantalla.blit(self.img_asustado, (self.x - 19, self.y - 19))
+            return
+
+        if self.direccion == "derecha":
+            pantalla.blit(self.img_der, (self.x - 19, self.y - 19))
+        
         else:
             pantalla.blit(self.img_izq, (self.x - 19, self.y - 19))
+            
+    def activar_asustado(self, duracion=8):
+        self.asustado = True
+        self.tiempo_asustado = duracion 
+        
+    def actualizar_asustado(self, dt):
+        if self.asustado:
+            self.tiempo_asustado -= dt
+
+        if self.tiempo_asustado <= 0:
+            self.asustado = False
 
     def tile_actual(self, mapa):
         fila = int(
@@ -77,6 +108,7 @@ class Fantasma:
             destino_col = col - 1
             opuesta = "derecha"
         return destino_fila,destino_col,opuesta
+    
     def proxima_direccion(self,mapa,opuesta,fila,col, objetivo): #para cuando llega al objetivo
         mejor_dist_dir = [None,None]
         for dir in ["arriba","izquierda","abajo","derecha"]:
@@ -89,15 +121,39 @@ class Fantasma:
                 mejor_dist_dir[1]=dir
         if mejor_dist_dir[0] == None: return opuesta
         else: return mejor_dist_dir[1]
+        
+    def proxima_direccion_asustado(self, mapa, opuesta, fila, col):
+
+        opciones = []
+
+        for dir in ["arriba", "izquierda", "abajo", "derecha"]:
+
+            if dir == opuesta:
+                continue
+
+            dfil, dcol, _ = self.direccion_vecina(mapa, fila, col, dir)
+
+            if self.es_pared(mapa, dcol, dfil):
+                continue
+
+            opciones.append(dir)
+
+        if len(opciones) == 0:
+            return opuesta
+
+        return random.choice(opciones)
+    
     def calcular_objetivo(self, mapa, pacman): #default simple, a reemplazar en cada fantasma, menos en blinky
         return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
+    
     def calcular_inversa(self,mapa):
         opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"} 
         self.direccion=opuestas[self.direccion] 
         fila,columna,_ = self.direccion_vecina(mapa,self.destino[0],self.destino[1],self.direccion) 
         self.destino=(fila,columna) 
 
-    def actualizar(self, dt, mapa,pacman,modo):
+    def actualizar(self, dt, mapa, pacman, modo):
+        self.actualizar_asustado(dt)
         if self.destino is None:
             self.destino = (10,12)
         fila_a, col_a = self.tile_actual(mapa)
@@ -112,10 +168,41 @@ class Fantasma:
             fila_d = self.destino[0]
             col_d = self.destino[1]
             _,_, opuesta= self.direccion_vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
-            if modo == "SCATTER": objetivo = self.esquina
-            else: objetivo = self.calcular_objetivo(mapa,pacman)
-            self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d,objetivo)   
-            self.destino = self.direccion_vecina(mapa,fila_d,col_d,self.direccion)
+            
+            if self.muerto:
+                objetivo = (14, 13)   # centro de la ghost house
+                self.direccion = self.proxima_direccion(mapa, opuesta, fila_d, col_d, objetivo)
+                self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
+
+                if (fila_d, col_d) == objetivo:
+                    self.muerto = False
+                    self.saliendo_casa = True
+
+                return
+            
+            if self.saliendo_casa:
+                salida = (11, 13)
+                self.direccion = self.proxima_direccion(mapa, opuesta, fila_d, col_d, salida)
+                self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
+
+                if (fila_d, col_d) == salida:
+                    self.saliendo_casa = False
+
+                return
+            
+            elif self.asustado:
+                self.direccion = self.proxima_direccion_asustado(mapa, opuesta, fila_d, col_d)
+                self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
+            
+            else:
+                if modo == "SCATTER":
+                    objetivo = self.esquina
+                else:
+                    objetivo = self.calcular_objetivo(mapa, pacman)
+                
+                self.direccion = self.proxima_direccion(mapa, opuesta, fila_d, col_d, objetivo)
+                self.destino = self.direccion_vecina(mapa, fila_d, col_d, self.direccion)[:2]
+        
         else:
             vector_direccion = (centro_d - pos_a).normalize()
             self.x = (pos_a + vector_direccion * paso).x
@@ -126,13 +213,11 @@ class Fantasma:
 class Blinky(Fantasma):
     pass
 
-
 class Pinky(Fantasma):
     def calcular_objetivo(self, mapa, pacman):
         fila, columna = self.tile_dexy(pacman.x, pacman.y, mapa)
         pacdeltafila, pacdeltacol = DELTAS[pacman.direccion]
         return (fila + pacdeltafila * 4, columna + pacdeltacol * 4)
-
 
 class Inky(Fantasma):
     def __init__(self, x, y, nombre, color, puntaje, velocidad, compa):
@@ -147,7 +232,6 @@ class Inky(Fantasma):
         puntocol = paccol + pacdeltacol * 2
         blinky_f, blinky_col = self.compa.tile_actual(mapa)
         return (2 * puntof - blinky_f, 2 * puntocol - blinky_col)
-
 
 class Clyde(Fantasma):
     def calcular_objetivo(self, mapa, pacman):

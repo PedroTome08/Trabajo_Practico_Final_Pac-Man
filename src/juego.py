@@ -35,7 +35,7 @@ inky = Inky(
 clyde = Clyde(x=660, y=300, nombre="Clyde", color="orange", puntaje=200, velocidad=80)
 jose = Fantasma5(x=600, y=330, nombre="Jose", color="green", puntaje=200, velocidad=80)
 nacho = Fantasma6(
-    x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80
+    x=620, y=330, nombre="Nacho", color="white", puntaje=200, velocidad=80
 )
 
 fantasmas: list[Fantasma] = []
@@ -62,6 +62,12 @@ ESQUINAS = {
     "Inferior Derecha": (mapa.filas - 1, mapa.columnas - 1),
 }
 
+INVERSA = {
+    "arriba": "abajo",
+    "abajo": "arriba",
+    "izquierda": "derecha",
+    "derecha": "izquierda",
+}
 
 while corriendo:
     # acá se almacenan los movimientos
@@ -139,6 +145,10 @@ while corriendo:
                 pygame.mixer.music.stop()
                 
                 menu.estado = "INICIO"
+                
+                menu.fantasmas_elegidos.clear()
+                menu.config_final.clear()
+                menu.opcion_actual = 0
 
                 game_over = False
                 victoria = False
@@ -202,7 +212,7 @@ while corriendo:
                 nacho = Fantasma6(
                     x=620,
                     y=330,
-                    nombre="Nacho_(el mago)",
+                    nombre="Nacho",
                     color="white",
                     puntaje=200,
                     velocidad=80,
@@ -248,19 +258,32 @@ while corriendo:
             elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                 pacman.mover("derecha")
 
-            puntos = pacman.actualizar(dt, mapa)
-
+            puntos, power_pellet = pacman.actualizar(dt, mapa)
             menu.high_score += puntos
+
+            if power_pellet:
+
+                for fantasma in fantasmas:
+                    fantasma.activar_asustado()
+                    fantasma.direccion = INVERSA[fantasma.direccion]
 
             pacman.dibujar(pantalla)
 
-            # colisiones
+            #colisiones
 
             for fantasma in fantasmas:
 
                 if pacman.colisionar(fantasma):
-                    pacman.perder_vida()
-                    break
+
+                    if fantasma.asustado:
+                        menu.high_score += fantasma.puntaje
+                        fantasma.muerto = True
+                        fantasma.asustado = False
+                        fantasma.destino = None
+
+                    else:
+                        pacman.perder_vida()
+                        break
 
             # TODO: PREGUNTAR PARA QUE SE USABA
             """modo = estado_global.obtener_modo()
