@@ -34,6 +34,8 @@ nacho = Fantasma6(
     x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80
 )
 
+fantasmas = [blinky, pinky, inky, clyde, jose, nacho]
+
 menu = Menu(ANCHO, ALTO)
 col = 13
 fila = 23
@@ -88,6 +90,11 @@ while corriendo:
         puntos = pacman.actualizar(dt, mapa)
         menu.high_score += puntos
         pacman.dibujar(pantalla)
+        
+        for fantasma in fantasmas:
+            if pacman.colisionar(fantasma):
+                pacman.perder_vida()
+                break
 
         # hago que aparezcan los fantasmas en el juego
         blinky.dibujar_fantasmas(pantalla)

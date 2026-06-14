@@ -1,6 +1,5 @@
 import pygame
 
-
 class PacMan:
     def __init__(self, x, y, vidas, velocidad):
         self.x = x
@@ -128,4 +127,23 @@ class PacMan:
             x -= self.velocidad * dt
         return x, y
 
-    # metodo que le saca la vida
+    #metodo que le saca la vida
+    def perder_vida(self):
+        self.vidas -= 1
+
+    #vuelve a la posicion inicial
+        self.x = self.x_inicial
+        self.y = self.y_inicial
+
+    #reinicia direccion
+        self.direccion = "derecha"
+        self.direccion_deseada = "derecha"
+
+    def esta_vivo(self):
+        return self.vidas > 0
+
+    def colisionar(self, fantasma):
+        distancia = ((self.x - fantasma.x) ** 2 + (self.y - fantasma.y) ** 2) ** 0.5
+        return distancia < self.radio + 15
+    
+    
