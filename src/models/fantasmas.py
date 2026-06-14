@@ -22,7 +22,7 @@ class Fantasma:
         self.esquina = (-2,1) #placeholder, cambiar
     def es_pared(self,mapa,col,fila):
         if 0 <= fila < mapa.filas and 0 <= col < mapa.columnas:
-            return mapa.grilla[fila][col] == "X"
+            return mapa.grilla[fila][col] == "X" or mapa.grilla[fila][col] == "G"
         return True
     def dibujar_fantasmas(self, pantalla):
         if self.direccion == "derecha":
@@ -30,7 +30,7 @@ class Fantasma:
         else:
             pantalla.blit(self.img_izq, (self.x- 19, self.y- 19))
     def tile_actual(self,mapa):
-        fila=int((self.y-mapa.offset_y)//mapa.tile) #redondear para abajo y calcular la columna y filas en la grilla (no en pixeles)
+        fila=int((self.y-mapa.offset_y)//mapa.tile) #redondear para abajo con // y calcular la columna y filas en la grilla 
         col=int((self.x-mapa.offset_x)//mapa.tile) 
         return fila,col
     def tile_dexy(self,x,y,mapa):
@@ -73,9 +73,15 @@ class Fantasma:
         else: return mejor_dist_dir[1]
     def calcular_objetivo(self, mapa, pacman): #default simple, a reemplazar en cada fantasma, menos en blinky
         return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
-    def actualizar(self, dt, mapa,pacman):
+    def calcular_inversa(self,mapa):
+        opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"} 
+        self.direccion=opuestas[self.direccion] 
+        fila,columna,_ = self.direccion_vecina(mapa,self.destino[0],self.destino[1],self.direccion) 
+        self.destino=(fila,columna) 
+
+    def actualizar(self, dt, mapa,pacman,modo):
         if self.destino is None:
-            self.destino = (12,12)
+            self.destino = (10,12)
         fila_a, col_a = self.tile_actual(mapa)
         centro_d = self.calcular_centro(self.destino[0],self.destino[1],mapa)
         pos_a = pygame.Vector2(self.x,self.y)
@@ -86,7 +92,8 @@ class Fantasma:
             fila_d = self.destino[0]
             col_d = self.destino[1]
             _,_, opuesta= self.direccion_vecina(mapa,fila_d,col_d,self.direccion) # el _ porque no nos importa
-            objetivo = self.calcular_objetivo(mapa,pacman)
+            if modo == "SCATTER": objetivo = self.esquina
+            else: objetivo = self.calcular_objetivo(mapa,pacman)
             self.direccion = self.proxima_direccion(mapa,opuesta,fila_d,col_d,objetivo)   
             self.destino = self.direccion_vecina(mapa,fila_d,col_d,self.direccion)
         else:

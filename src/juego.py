@@ -30,6 +30,13 @@ clyde = Clyde(x=660, y=300, nombre="Clyde", color="orange", puntaje=200, velocid
 jose = Fantasma5(x=600, y=330, nombre="Jose", color="green", puntaje=200, velocidad=80)
 nacho = Fantasma6(x=620, y=330, nombre="Nacho_(el mago)", color="white", puntaje=200, velocidad=80)
 
+blinky.esquina = (1, mapa.columnas - 2)
+pinky.esquina  = (1, 1)
+inky.esquina   = (mapa.filas - 2, mapa.columnas - 2)
+clyde.esquina  = (mapa.filas - 2, 1)
+
+
+
 menu = Menu(ANCHO, ALTO)
 col = 13
 fila = 23
@@ -51,9 +58,7 @@ while corriendo:
         menu.dibujar(pantalla)
     
     else:
-        if not sonido_iniciado:
-            pygame.mixer.music.play(-1)            
-            sonido_iniciado = True
+    #
         
         #color de la pantalla
         pantalla.fill("black")
@@ -62,7 +67,11 @@ while corriendo:
         mapa.dibujar(pantalla)
         
         #actualizo el reloj de los fantasmas
-        estado_global.actualizar(dt, False)
+        modo = estado_global.obtener_modo()
+        cambio = estado_global.actualizar(dt, False)
+        if cambio:
+            for i in (blinky,pinky,inky,clyde):
+                i.calcular_inversa(mapa)
         
         #que pasa cuando toco las teclas WASD o las flechas del teclado para moverlo
         pacman.moviendose = False
@@ -82,16 +91,16 @@ while corriendo:
         
         #hago que aparezcan los fantasmas en el juego
         blinky.dibujar_fantasmas(pantalla)
-        blinky.actualizar(dt,mapa,pacman)
+        blinky.actualizar(dt,mapa,pacman,modo)
 
         pinky.dibujar_fantasmas(pantalla)
-        pinky.actualizar(dt,mapa,pacman)
+        pinky.actualizar(dt,mapa,pacman,modo)
 
         inky.dibujar_fantasmas(pantalla)
-        inky.actualizar(dt,mapa,pacman)
-        
+        inky.actualizar(dt,mapa,pacman,modo)
+
         clyde.dibujar_fantasmas(pantalla)
-        clyde.actualizar(dt,mapa,pacman)
+        clyde.actualizar(dt,mapa,pacman,modo)
 
         jose.dibujar_fantasmas(pantalla)
         nacho.dibujar_fantasmas(pantalla)
