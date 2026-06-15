@@ -24,7 +24,19 @@ class Fantasma:
         self.destino = None
         self.esquina = (-2, 1)  # placeholder, cambiar
 
+        #cosas de la ghost house
+        self.encerrado = False
+        self.umbral = 0
+
+        #para el reset
+        self.x_inicial = x
+        self.y_inicial = y
+        self.encerrado_inicial = False
     def es_pared(self, mapa, col, fila):
+        #para dejar pasar por el tunel
+        if 0 <= fila < mapa.filas and (col == -1 or col == mapa.columnas):
+            if mapa.grilla[fila][0] == "T" or mapa.grilla[fila][mapa.columnas - 1] == "T":
+                return False
         if not (0 <= fila < mapa.filas and 0 <= col < mapa.columnas):
             return True
 
@@ -68,6 +80,29 @@ class Fantasma:
 
         if self.tiempo_asustado <= 0:
             self.asustado = False
+
+    def velocidad_actual(self, mapa):
+        base = 7.5 * mapa.tile
+        if self.muerto:
+            return base * 1.50
+        if self.asustado:
+            return base * 0.50
+        fila, col = self.tile_actual(mapa)
+        if 0 <= fila < mapa.filas and 0 <= col < mapa.columnas:
+            if mapa.grilla[fila][col] == "T":
+                return base * 0.40
+        return base * 0.75
+
+    def reset(self, mapa):
+        self.x = self.x_inicial
+        self.y = self.y_inicial
+        self.direccion = "izquierda"
+        self.destino = None
+        self.muerto = False
+        self.asustado = False
+        self.saliendo_casa = False
+        self.tiempo_asustado = 0
+        self.encerrado = self.encerrado_inicial
 
     def tile_actual(self, mapa):
         fila = int(
@@ -148,6 +183,9 @@ class Fantasma:
         return (self.tile_dexy(pacman.x,pacman.y,mapa)) 
     
     def calcular_inversa(self,mapa):
+        if self.destino is None:
+            return
+        opuestas = {...}
         opuestas = {"arriba": "abajo", "abajo": "arriba", "izquierda": "derecha", "derecha": "izquierda"} 
         self.direccion=opuestas[self.direccion] 
         fila,columna,_ = self.direccion_vecina(mapa,self.destino[0],self.destino[1],self.direccion) 
@@ -180,14 +218,22 @@ class Fantasma:
             paso = anterior
         return primera
 
-    def actualizar(self, dt, mapa, pacman, modo):
+    def actualizar(self, dt, mapa, pacman, modo,puntos_comidos):
         self.actualizar_asustado(dt)
+
+        if self.encerrado:
+            if puntos_comidos >= self.umbral:
+                self.encerrado = False
+                self.saliendo_casa = True
+            else:
+                return     
+        
         if self.destino is None:
             self.destino = (10,12)
         fila_a, col_a = self.tile_actual(mapa)
         centro_d = self.calcular_centro(self.destino[0], self.destino[1], mapa)
         pos_a = pygame.Vector2(self.x, self.y)
-        paso = self.velocidad * dt
+        paso = self.velocidad_actual(mapa) * dt
         if (
             pos_a.distance_to(centro_d) <= paso
         ):  # para evitar error acumulado al centrar
@@ -232,7 +278,13 @@ class Fantasma:
             vector_direccion = (centro_d - pos_a).normalize()
             self.x = (pos_a + vector_direccion * paso).x
             self.y = (pos_a + vector_direccion * paso).y
-
+        #caso tunel
+        if self.x < mapa.offset_x:
+            self.x += mapa.ancho
+            self.destino = (self.destino[0], self.destino[1] + mapa.columnas)
+        elif self.x > mapa.offset_x + mapa.ancho:
+            self.x -= mapa.ancho
+            self.destino = (self.destino[0], self.destino[1] - mapa.columnas)
 
 # cada fantasma hereda los atributos de la clase Fantasma
 class Blinky(Fantasma):

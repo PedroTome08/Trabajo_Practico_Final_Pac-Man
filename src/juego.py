@@ -11,6 +11,10 @@ from models.estados import Estado
 
 from utils.game_over import dibujar_game_over
 
+def centro(fila, col):
+    return (mapa.offset_x + col*mapa.tile + mapa.tile/2,
+            mapa.offset_y + fila*mapa.tile + mapa.tile/2)
+
 pygame.init()
 sonido_asustado = pygame.mixer.Sound("assets/sounds/modoAsustado.mp3")
 DURACION_GAME_OVER_MS = 2000
@@ -28,7 +32,7 @@ pacman = PacMan(
     x=mapa.pacman_inicio_x,
     y=mapa.pacman_inicio_y,
     vidas=3,
-    velocidad=100,
+    velocidad=0.80 * 7.5 * mapa.tile,
 )
 
 # fantasmas
@@ -76,6 +80,8 @@ INVERSA = {
 }
 
 nivel = 1
+
+puntos_comidos =0
 
 fuente_hud = pygame.font.SysFont("Courier New", 28)
 
@@ -161,6 +167,11 @@ while corriendo:
                 if fantasma.nombre in menu.config_final:
 
                     fantasma.esquina = ESQUINAS[menu.config_final[fantasma.nombre]]
+            umbrales = [0, 30, 60, 90]
+            for i, fantasma in enumerate(fantasmas):
+                fantasma.umbral = umbrales[i]
+                fantasma.encerrado = (i != 0)
+                fantasma.encerrado_inicial = (i!=0)
 
             config_aplicada = True
 
@@ -222,26 +233,29 @@ while corriendo:
                     vidas=3,
                     velocidad=100,
                 )
-
+                bx, by = centro(11, 13)
+                px, py = centro(14, 12)
+                ix, iy = centro(14, 13)
+                cx, cy = centro(14, 14)
                 blinky = Blinky(
-                    x=600,
-                    y=300,
+                    x=bx,
+                    y=by,
                     nombre="Blinky",
                     color="red",
                     puntaje=200,
                     velocidad=80,
                 )
                 pinky = Pinky(
-                    x=620,
-                    y=300,
+                    x=px,
+                    y=py,
                     nombre="Pinky",
                     color="pink",
                     puntaje=200,
                     velocidad=80,
                 )
                 inky = Inky(
-                    x=640,
-                    y=300,
+                    x=ix,
+                    y=iy,
                     nombre="Inky",
                     color="cyan",
                     puntaje=200,
@@ -249,24 +263,24 @@ while corriendo:
                     compa=blinky,
                 )
                 clyde = Clyde(
-                    x=660,
-                    y=300,
+                    x=cx,
+                    y=cy,
                     nombre="Clyde",
                     color="orange",
                     puntaje=200,
                     velocidad=80,
                 )
                 jose = Fantasma5(
-                    x=600,
-                    y=330,
+                    x=ix,
+                    y=iy,
                     nombre="Jose",
                     color="green",
                     puntaje=200,
                     velocidad=80,
                 )
                 nacho = Fantasma6(
-                    x=620,
-                    y=330,
+                    x=cx,
+                    y=cy,
                     nombre="Nacho",
                     color="white",
                     puntaje=200,
@@ -295,7 +309,11 @@ while corriendo:
 
         else:
             # actualizo el reloj de los fantasmas
-            estado_global.actualizar(dt, False)
+            modo = estado_global.obtener_modo()
+            cambio = estado_global.actualizar(dt, False)
+            if cambio:
+                for fantasma in fantasmas:
+                    fantasma.calcular_inversa(mapa)
 
             pacman.moviendose = False
 
@@ -316,6 +334,8 @@ while corriendo:
             puntos, power_pellet = pacman.actualizar(dt, mapa)
             
             score += puntos
+            if puntos > 0:
+                puntos_comidos += 1
             
             if score > menu.high_score:
                 menu.high_score = score
@@ -344,22 +364,16 @@ while corriendo:
 
                     else:
                         pacman.perder_vida()
+                        for f in fantasmas:
+                            f.reset(mapa)
                         break
-
-            # TODO: PREGUNTAR PARA QUE SE USABA
-            """modo = estado_global.obtener_modo()
-            cambio = estado_global.actualizar(dt, False)
-            if cambio:
-                for i in (blinky,pinky,inky,clyde):
-                    i.calcular_inversa(mapa)"""
-
-            modo = estado_global.obtener_modo()
 
             # hago que aparezcan los fantasmas en el juego
             for fantasma in fantasmas:
 
                 fantasma.dibujar_fantasmas(pantalla)
-                fantasma.actualizar(dt, mapa, pacman, modo)
+                fantasma.actualizar(dt, mapa, pacman, modo,puntos_comidos
+                                    )
 
             if not any(f.asustado for f in fantasmas):
                 sonido_asustado.stop()
