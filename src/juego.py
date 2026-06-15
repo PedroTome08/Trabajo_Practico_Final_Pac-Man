@@ -72,6 +72,9 @@ score = 0
 game_over = False
 victoria = False
 game_over_inicio = None
+PUNTAJES_FANTASMA = [200, 400, 800, 1600]
+fantasmas_comidos_seguidos = 0
+vida_extra_dada = False
 
 ESQUINAS = {
     "Superior Izquierda": (0, 0),
@@ -250,6 +253,8 @@ while corriendo:
                 intro_lista = False
                 score = 0
                 puntos_comidos = 0
+                fantasmas_comidos_seguidos = 0
+                vida_extra_dada = False
                 fantasmas.clear()
 
                 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
@@ -382,7 +387,8 @@ while corriendo:
                 menu.high_score = score
 
             if power_pellet:
-                sonido_asustado.play(-1)  # loop mientras dura el modo
+                fantasmas_comidos_seguidos = 0
+                sonido_asustado.play(-1)
                 for fantasma in fantasmas:
                     fantasma.activar_asustado()
                     fantasma.direccion = INVERSA[fantasma.direccion]
@@ -398,7 +404,9 @@ while corriendo:
                         continue
 
                     if fantasma.asustado:
-                        menu.high_score += fantasma.puntaje
+                        idx = min(fantasmas_comidos_seguidos, 3)
+                        score += PUNTAJES_FANTASMA[idx]
+                        fantasmas_comidos_seguidos += 1
                         fantasma.muerto = True
                         fantasma.asustado = False
 
@@ -410,7 +418,9 @@ while corriendo:
                         for f in fantasmas:
                             f.reset(mapa)
                         break
-
+            if not vida_extra_dada and score >= 10000:
+                pacman.vidas += 1
+                vida_extra_dada = True
             # hago que aparezcan los fantasmas en el juego
             for fantasma in fantasmas:
 
