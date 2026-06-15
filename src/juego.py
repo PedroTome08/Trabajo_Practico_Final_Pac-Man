@@ -239,6 +239,7 @@ while corriendo:
                 sonido_iniciado = False
                 intro_lista = False
                 score = 0
+                puntos_comidos = 0
                 fantasmas.clear()
 
                 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
@@ -366,7 +367,7 @@ while corriendo:
             score += puntos
             if puntos > 0:
                 puntos_comidos += 1
-            
+                
             if score > menu.high_score:
                 menu.high_score = score
 
@@ -390,7 +391,6 @@ while corriendo:
                         menu.high_score += fantasma.puntaje
                         fantasma.muerto = True
                         fantasma.asustado = False
-                        fantasma.destino = None
 
                     else:
                         pacman.perder_vida()

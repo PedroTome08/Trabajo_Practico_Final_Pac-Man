@@ -32,6 +32,8 @@ class Fantasma:
         self.x_inicial = x
         self.y_inicial = y
         self.encerrado_inicial = False
+
+        
     def es_pared(self, mapa, col, fila):
         #para dejar pasar por el tunel
         if 0 <= fila < mapa.filas and (col == -1 or col == mapa.columnas):
@@ -44,9 +46,6 @@ class Fantasma:
 
         #si esta muerto puede entrar a la ghost house
         if self.muerto or self.saliendo_casa:
-            en_casa = 11 <= fila <= 16 and 9 <= col <= 18
-            if celda == " " and not en_casa:
-                return True
             return celda == "X"
 
         return celda == "X" or celda == "G"
