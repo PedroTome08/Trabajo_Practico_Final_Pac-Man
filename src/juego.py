@@ -12,6 +12,11 @@ from models.estados import Estado
 from utils.game_over import dibujar_game_over
 
 def centro(fila, col):
+    """
+    Hace el cálculo para obtener las coordenadas del centro de una casilla del mapa a partir de su fila y columna
+    Argumentos: fila y columna del mapa
+    Retorna: coordenadas x e y del centro de esa casilla
+    """
     return (mapa.offset_x + col*mapa.tile + mapa.tile/2,
             mapa.offset_y + fila*mapa.tile + mapa.tile/2)
 
@@ -89,7 +94,12 @@ puntos_comidos =0
 fuente_hud = pygame.font.SysFont("Courier New", 28)
 
 def dibujar_hud(pantalla, score, high_score, nivel, vidas):
-
+    """
+    Dibuja el HUD con el score, high score, nivel y vidas restantes
+    Argumentos: pantalla donde dibujar, score actual, high score, nivel actual y vidas restantes
+    Retorna: nada, dibuja directamente en la pantalla
+    """
+    
     pygame.draw.rect(
         pantalla,
         (20, 20, 20),

@@ -72,10 +72,10 @@ class Menu:
         ]
 
     def actualizar(self, dt: float):
-        """_summary_
-
-        Argumentos:
-            dt (float): _description_
+        """
+        Actualiza el estado del menú. En este caso, se encarga de hacer parpadear el texto de "Presioná ENTER para jugar" en la pantalla de inicio cada medio segundo.
+        Argumentos: dt, que es el tiempo transcurrido desde la última actualización, en segundos. Esto se utiliza para controlar el tiempo de parpadeo del texto.
+        Retorna: Nada
         """
         if self.estado == "INICIO":
             # como hacer que el texto parpadee cada medio segundo
@@ -86,6 +86,12 @@ class Menu:
                 self.tiempo_parpadeo = 0
 
     def manejar_eventos(self, evento):
+        """
+        Maneja los eventos del menú. Dependiendo del estado actual del menú, responde a diferentes eventos de teclado para navegar entre las opciones y configurar el juego.
+        Argumentos: evento, que es un objeto de evento de Pygame que representa una acción del usuario, como presionar una tecla.
+        Retorna: Nada
+        """
+        
         # si el usuario no presiona ninguna tecla, sale de la funcion
         if evento.type != pygame.KEYDOWN:
             return
@@ -140,6 +146,12 @@ class Menu:
         # delta_time = 1 / FPS
 
     def dibujar(self, pantalla):
+        """
+        Dibuja el menú en la pantalla. Dependiendo del estado actual del menú, muestra diferentes elementos gráficos, como el título, las opciones de selección de fantasmas y esquinas, y el texto de parpadeo en la pantalla de inicio.
+        Argumentos: pantalla, que es un objeto de superficie de Pygame donde se dibujarán los elementos del menú.
+        Retorna: Nada
+        """
+        
         # pantalla negra
         pantalla.fill((0, 0, 0))
 
@@ -151,6 +163,12 @@ class Menu:
             self.dibujar_seleccion_esquinas(pantalla)
 
     def dibujar_inicio(self, pantalla):
+        """
+        Dibuja la pantalla de inicio del menú. Muestra el texto "HIGH SCORE", el puntaje más alto, el título "PAC -MAN" y el texto de parpadeo "Presioná ENTER para jugar".
+        Argumentos: pantalla, que es un objeto de superficie de Pygame donde se dibujarán los elementos de la pantalla de inicio.
+        Retorna: Nada
+        """
+        
         texto_arriba = self.fuente_chica.render("HIGH SCORE", True, (120, 120, 120))
         texto_score = self.fuente_chica.render(
             str(self.high_score), True, (0, 255, 0)
@@ -178,6 +196,12 @@ class Menu:
             )
 
     def dibujar_seleccion_fantasmas(self, pantalla):
+        """
+        Dibuja la pantalla de selección de fantasmas del menú. Muestra el título dinámico que indica cuántos fantasmas han sido elegidos, una lista de opciones de fantasmas con su color y descripción, y resalta los fantasmas seleccionados con un recuadro blanco.
+        Argumentos: pantalla, que es un objeto de superficie de Pygame donde se dibujarán los elementos de la pantalla de selección de fantasmas.
+        Retorna: Nada
+        """
+        
         cant = len(self.fantasmas_elegidos)
         texto_titulo = self.fuente_normal.render(
             f"Elegí 4 fantasmas [{cant}/4]", True, (255, 255, 0)
@@ -224,6 +248,12 @@ class Menu:
                 )
 
     def dibujar_seleccion_esquinas(self, pantalla):
+        """
+        Dibuja la pantalla de selección de esquinas del menú. Muestra el título dinámico que indica a qué fantasma se le está asignando una esquina, una lista de opciones de esquinas y resalta las esquinas ya asignadas con un color gris.
+        Argumentos: pantalla, que es un objeto de superficie de Pygame donde se dibujarán los elementos de la pantalla de selección de esquinas.
+        Retorna: Nada
+        """
+        
         fantasma_indice = self.fantasmas_elegidos[self.opcion_actual]
         f = self.fantasmas_info[fantasma_indice]
 
