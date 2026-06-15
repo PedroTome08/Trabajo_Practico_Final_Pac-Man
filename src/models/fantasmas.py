@@ -96,16 +96,18 @@ class Fantasma:
         if self.muerto:
             img = self.img_muerto
         elif self.asustado:
-            img = self.img_asustado
+            if self.tiempo_asustado <= 2 and int(self.tiempo_asustado * 5) % 2 == 0:
+                # parpadeo final: muestro la cara normal en vez del azul
+                img = self.img_der if self.direccion == "derecha" else self.img_izq
+            else:
+                img = self.img_asustado
         elif self.direccion == "derecha":
             img = self.img_der
         else:
             img = self.img_izq
-        pantalla.blit(
-            img, (self.x - img.get_width() / 2, self.y - img.get_height() / 2)
-        )
+        pantalla.blit(img, (self.x - img.get_width() / 2, self.y - img.get_height() / 2))
 
-    def activar_asustado(self, duracion=8):
+    def activar_asustado(self, duracion=6):
         """
         Activa el estado asustado del fantasma durante una duración determinada.
 
@@ -420,7 +422,7 @@ class Fantasma:
                 return
 
         if self.destino is None:
-            self.destino = (10, 12)
+            self.destino = self.tile_actual(mapa)
         fila_a, col_a = self.tile_actual(mapa)
         centro_d = self.calcular_centro(self.destino[0], self.destino[1], mapa)
         pos_a = pygame.Vector2(self.x, self.y)

@@ -184,10 +184,17 @@ while corriendo:
 
                     fantasma.esquina = ESQUINAS[menu.config_final[fantasma.nombre]]
             umbrales = [0, 30, 60, 90]
+            posiciones = [centro(11, 13), centro(14, 12), centro(14, 13), centro(14, 14)]
             for i, fantasma in enumerate(fantasmas):
                 fantasma.umbral = umbrales[i]
                 fantasma.encerrado = (i != 0)
-                fantasma.encerrado_inicial = (i!=0)
+                fantasma.encerrado_inicial = (i != 0)
+                fx, fy = posiciones[i]
+                fantasma.x = fx
+                fantasma.y = fy
+                fantasma.x_inicial = fx
+                fantasma.y_inicial = fy
+                fantasma.destino = None
 
             config_aplicada = True
         if not intro_lista:
@@ -376,7 +383,11 @@ while corriendo:
 
             elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
                 pacman.mover("derecha")
-
+            
+            if any(f.asustado for f in fantasmas):
+                pacman.velocidad = 0.90 * 7.5 * mapa.tile
+            else:
+                pacman.velocidad = 0.80 * 7.5 * mapa.tile
             puntos, power_pellet = pacman.actualizar(dt, mapa)
             
             score += puntos
