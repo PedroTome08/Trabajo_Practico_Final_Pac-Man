@@ -320,7 +320,18 @@ class Clyde(Fantasma):
             return self.esquina
 
 class Fantasma5(Fantasma):
-    pass
+    def calcular_objetivo(self, mapa, pacman):
+        pacman_fila, pacman_col = self.tile_dexy(pacman.x, pacman.y, mapa)
+        centro_fila = mapa.filas // 2
+        centro_col = mapa.columnas // 2
+        # reflejo la posicion de pacman al lado opuesto del centro
+        objetivo_fila = 2 * centro_fila - pacman_fila
+        objetivo_col = 2 * centro_col - pacman_col
+        return (objetivo_fila, objetivo_col)
 
 class Fantasma6(Fantasma):
-    pass
+    def calcular_objetivo(self, mapa, pacman):
+        if random.random() < 0.25:
+            return (random.randint(0, mapa.filas - 1),
+                    random.randint(0, mapa.columnas - 1))
+        return self.tile_dexy(pacman.x, pacman.y, mapa)
