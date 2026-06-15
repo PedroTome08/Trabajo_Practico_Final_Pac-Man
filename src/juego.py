@@ -13,6 +13,7 @@ from utils.game_over import dibujar_game_over
 
 pygame.init()
 sonido_asustado = pygame.mixer.Sound("assets/sounds/modoAsustado.mp3")
+sonido_muerte = pygame.mixer.Sound("assets/sounds/muertePacman.mp3")
 DURACION_GAME_OVER_MS = 2000
 ANCHO, ALTO = 1280, 720
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
@@ -21,6 +22,8 @@ corriendo = True
 # delta tiempo
 dt = 0
 sonido_iniciado = False
+muerte_sonando = False
+intro_lista = False
 mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
 menu = Menu(ANCHO, ALTO)
 
@@ -163,7 +166,21 @@ while corriendo:
                     fantasma.esquina = ESQUINAS[menu.config_final[fantasma.nombre]]
 
             config_aplicada = True
+        if not intro_lista:
+            pygame.mixer.music.load("assets/sounds/inicio.mp3")
+            pygame.mixer.music.play()
+            intro_lista = True
 
+        if pygame.mixer.music.get_busy():
+            pantalla.fill("black")
+            mapa.dibujar(pantalla)
+            pacman.dibujar(pantalla)
+            for fantasma in fantasmas:
+                fantasma.dibujar_fantasmas(pantalla)
+            dibujar_hud(pantalla, score, menu.high_score, nivel, pacman.vidas)
+            pygame.display.flip()
+            dt = reloj.tick(60) / 1000
+            continue
 
         # color de la pantalla
         pantalla.fill("black")
@@ -209,6 +226,7 @@ while corriendo:
                 game_over_inicio = None
                 config_aplicada = False
                 sonido_iniciado = False
+                intro_lista = False
                 score = 0
                 fantasmas.clear()
 
@@ -278,7 +296,7 @@ while corriendo:
         # pantalla victoria
 
         elif victoria:
-
+            pygame.mixer.stop()
             fuente = pygame.font.SysFont("Courier New", 72, bold=True)
 
             texto = fuente.render("YOU WIN!", True, (255, 255, 0))
@@ -294,9 +312,21 @@ while corriendo:
         # juego normal
 
         else:
+            if muerte_sonando:
+                if pygame.mixer.get_busy():
+                    pacman.dibujar(pantalla)
+                    for fantasma in fantasmas:
+                        fantasma.dibujar_fantasmas(pantalla)
+                    dibujar_hud(pantalla, score, menu.high_score, nivel, pacman.vidas)
+                    pygame.display.flip()
+                    dt = reloj.tick(60) / 1000
+                    continue
+                else:
+                    muerte_sonando = False
+                    
             # actualizo el reloj de los fantasmas
             estado_global.actualizar(dt, False)
-
+            
             pacman.moviendose = False
 
             keys = pygame.key.get_pressed()
@@ -344,6 +374,9 @@ while corriendo:
 
                     else:
                         pacman.perder_vida()
+                        pygame.mixer.stop()
+                        sonido_muerte.play() 
+                        muerte_sonando = True
                         break
 
             # TODO: PREGUNTAR PARA QUE SE USABA

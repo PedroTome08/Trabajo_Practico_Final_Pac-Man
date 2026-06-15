@@ -98,9 +98,10 @@ class Mapa:
         fil = int((y - self.offset_y) // self.tile)
 
         if 0 <= fil < self.filas and 0 <= col < self.columnas:
-            return self.grilla[fil][col] == "X"
+            celda = self.grilla[fil][col]
+            return celda == 'X' or celda == 'G' or celda == '-'  # pacman no entra a la casa
 
-        return False  # si esta adentro del mapa y no es pared, es pasillo valido
+        return False
 
     def quedas_puntos(self):
         """CAMBIAR DOCSTRING: Recorre la grilla buscando si todavía queda algún punto o ."""
