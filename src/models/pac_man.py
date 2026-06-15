@@ -21,7 +21,14 @@ class PacMan:
 
         pygame.mixer.init()
         self.sonido_comer = pygame.mixer.Sound("assets/sounds/wakawaka.mp3")
+    
     def _choca(self, mapa, x, y):
+        """
+        Verifica si la posición (x, y) choca con una pared en el mapa
+        Argumentos: mapa: el objeto del mapa que contiene la información de las paredes
+                   x, y: las coordenadas a verificar
+        Retorna: True si choca con una pared, False si no choca
+        """
         r = self.radio
         for px, py in [
             (x + r, y),
@@ -35,6 +42,14 @@ class PacMan:
         return False
 
     def actualizar(self, dt, mapa):
+        """
+        Actualiza la posición de PacMan, verifica colisiones con paredes y recoge puntos.
+        Argumentos: dt: el tiempo transcurrido desde la última actualización
+                   mapa: el objeto del mapa para verificar colisiones y recoger puntos
+        Retorna: puntos_ganados: la cantidad de puntos ganados al recoger puntos en esta actualización
+                 power_pellet: True si se recogió un superpunto, False si no
+        """
+        
         puntos_ganados = 0
         power_pellet = False
 
@@ -100,9 +115,21 @@ class PacMan:
         return puntos_ganados, power_pellet
 
     def mover(self, movimiento):
+        """
+        Actualiza la dirección deseada de PacMan según el movimiento ingresado.
+        Argumentos: movimiento: una cadena que representa la dirección deseada ("arriba", "abajo", "izquierda", "derecha")
+        Retorna: Nada
+        """
+        
         self.direccion_deseada = movimiento.lower()
 
     def dibujar(self, pantalla):
+        """
+        Dibuja a PacMan en la pantalla con la boca abierta o cerrada según su estado de animación.
+        Argumentos: pantalla: el objeto de la pantalla donde se dibujará a PacMan
+        Retorna: Nada
+        """
+        
         rotaciones = {
             "derecha": 0,
             "izquierda": 180,
@@ -122,6 +149,12 @@ class PacMan:
         pygame.draw.polygon(pantalla, "yellow", puntos)
 
     def _destino(self, direccion, dt):
+        """
+        Calcula la nueva posición de PacMan basada en la dirección y el tiempo transcurrido.
+        Argumentos: direccion: la dirección en la que se moverá PacMan ("arriba", "abajo", "izquierda", "derecha")
+        Retorna: una tupla (nuevo_x, nuevo_y) con las nuevas coordenadas de PacMan después de moverse en la dirección dada
+        """
+        
         x, y = self.x, self.y
         if direccion == "arriba":
             y -= self.velocidad * dt
@@ -135,6 +168,12 @@ class PacMan:
 
     #metodo que le saca la vida
     def perder_vida(self):
+        """
+        Resta una vida a PacMan y lo reinicia a su posición inicial.
+        Argumentos: Ninguno
+        Retorna: Nada
+        """
+        
         self.vidas -= 1
         #vuelve a la posicion inicial
         self.x = self.x_inicial
@@ -144,8 +183,20 @@ class PacMan:
         self.direccion_deseada = "derecha"
 
     def esta_vivo(self):
+        """
+        Verifica si PacMan aún tiene vidas restantes.
+        Argumentos: Ninguno
+        Retorna: True si PacMan tiene al menos una vida, False si no tiene vidas restantes
+        """
+        
         return self.vidas > 0
 
     def colisionar(self, fantasma):
+        """
+        Verifica si PacMan colisiona con un fantasma.
+        Argumentos: fantasma: el objeto del fantasma con el que se verificará la colisión
+        Retorna: True si hay una colisión entre PacMan y el fantasma, False si no hay colisión
+        """
+        
         distancia = ((self.x - fantasma.x) ** 2 + (self.y - fantasma.y) ** 2) ** 0.5
         return distancia < self.radio + 15

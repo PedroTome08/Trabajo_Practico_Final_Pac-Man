@@ -54,6 +54,11 @@ class Mapa:
                     self.grilla[f][c] = " "  # limpia ese lugar para que no quede basura
 
     def dibujar(self, pantalla):
+        """
+        Dibuja el mapa en la pantalla, recorriendo la grilla y dibujando cada tile según su tipo.
+        Argumentos: pantalla: superficie de pygame donde se dibuja el mapa.
+        Retorna: None
+        """
         t = self.tile
         for fila in range(len(self.grilla)):
             for columna in range(len(self.grilla[fila])):
@@ -94,6 +99,11 @@ class Mapa:
                     # posicion inicial de pacman
 
     def pasillo_pixel(self, x, y):
+        """
+        Verifica si las coordenadas (x, y) corresponden a un pasillo o espacio transitable en el mapa.
+        Argumentos: x: coordenada horizontal en píxeles, y: coordenada vertical en píxeles.
+        Retorna: True si es un pasillo o espacio transitable,
+        """
         col = int((x - self.offset_x) // self.tile)
         fil = int((y - self.offset_y) // self.tile)
 
@@ -104,7 +114,11 @@ class Mapa:
         return False
 
     def quedas_puntos(self):
-        """CAMBIAR DOCSTRING: Recorre la grilla buscando si todavía queda algún punto o ."""
+        """
+        Verifica si aún quedan puntos o superpuntos en el mapa.
+        Argumentos: None
+        Retorna: True si aún quedan puntos o superpuntos, False si no queda ninguno
+        """
 
         for fila in self.grilla:
             if "." in fila or "o" in fila:

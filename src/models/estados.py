@@ -17,8 +17,18 @@ class Estado:
         self.modo_actual = "SCATTER"
         self.tiempo_fase = 0
 
-    def actualizar(self, dt, asustado):
+    def actualizar(self, dt: float, asustado: bool):
+        """ Actualiza el estado de los fantasmas dependiendo del tiempo 
+        transcurrido y si están asustados o no.
 
+        Argumentos:
+            dt (float): el tiempo transcurrido desde la última actualización
+            asustado (bool): Indica si Pac-Man está asustado
+
+        Retorna:
+            bool: True si hubo un cambio de fase, False en caso contrario
+        """
+         
         if asustado:
             return False
 
@@ -36,9 +46,18 @@ class Estado:
         return False  # si no entra al if devuelve False porque no hubo cambio de fase
 
     def reset(self):
+        """Reinicia el sistema de estados al comienzo de la secuencia, 
+        restaurando la primera fase SCATTER y reiniciando el temporizador interno.
+        """
+        
         self.fase_actual = 0
         self.modo_actual = "SCATTER"
         self.tiempo_fase = 0
 
     def obtener_modo(self):  # para que los fantasmas hagan modo = estado.obtener_modo()
+        """Obtiene el modo actual del sistema de estados.
+
+        Retorna:
+            str: el modo actual del sistema de estados.
+        """
         return self.modo_actual
