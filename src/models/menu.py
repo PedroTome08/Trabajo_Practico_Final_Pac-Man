@@ -9,7 +9,8 @@ class Menu:
         # con estado me refiero a las pantallas (la de inicio, la de selección de fantasmas, la de seleccion de las esquinas y menu terminado)
         self.estado = "INICIO"
         self.score = 0
-        self.high_score = 0
+        self.archivo_high_score = "high_score.txt"
+        self.high_score = self.cargar_high_score()
 
         # fuentes del texto en distintos tamaños
         pygame.font.init()
@@ -281,4 +282,28 @@ class Menu:
             pantalla.blit(
                 texto_esquina, (self.ancho // 2 - 180, start_y + i * separacion)
             )
+    def cargar_high_score(self):
+        """
+        Lee el high score guardado en el archivo de texto.
+        Si el archivo no existe o tiene contenido inválido, devuelve 0.
+
+        Retorna:
+            int: el high score persistido, o 0 si no se pudo leer.
+        """
+        try:
+            with open(self.archivo_high_score) as archivo:
+                return int(archivo.read().strip())
+        except (FileNotFoundError, ValueError):
+            return 0
+
+    def guardar_high_score(self):
+        """
+        Guarda el high score actual en el archivo de texto,
+        sobrescribiendo el valor anterior.
+
+        Retorna:
+            None.
+        """
+        with open(self.archivo_high_score, "w") as archivo:
+            archivo.write(str(self.high_score))
 

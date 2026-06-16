@@ -1,5 +1,6 @@
 import sys
 import pygame
+import random
 
 sys.path.append("..")
 
@@ -42,6 +43,9 @@ pacman = PacMan(
     vidas=3,
     velocidad=0.80 * 7.5 * mapa.tile,
 )
+
+victoria_inicio = None
+DURACION_VICTORIA_MS = 2000
 
 # fantasmas
 blinky = Blinky(x=600, y=300, nombre="Blinky", color="red", puntaje=200, velocidad=80)
@@ -195,7 +199,18 @@ while corriendo:
                 fantasma.x_inicial = fx
                 fantasma.y_inicial = fy
                 fantasma.destino = None
-
+                fantasma.muerto = False
+                fantasma.asustado = False
+                fantasma.saliendo_casa = False
+                fantasma.tiempo_asustado = 0
+            # asignar compañero de Inky entre los fantasmas en juego
+            for fantasma in fantasmas:
+                if isinstance(fantasma, Inky):
+                    if blinky in fantasmas:
+                        fantasma.compa = blinky
+                    else:
+                        otros = [f for f in fantasmas if f is not fantasma]
+                        fantasma.compa = random.choice(otros)
             config_aplicada = True
         if not intro_lista:
             pygame.mixer.music.load("assets/sounds/inicio.mp3")
@@ -230,8 +245,15 @@ while corriendo:
         # pantalla game over
 
         if game_over:
+
+            
+
             if game_over_inicio is None:
                 game_over_inicio = pygame.time.get_ticks()
+
+            if pygame.time.get_ticks() - game_over_inicio >= DURACION_GAME_OVER_MS:
+                menu.guardar_high_score()
+                pygame.mixer.music.stop()
 
             # Dibujo la escena congelada
             pacman.dibujar(pantalla)
@@ -333,11 +355,18 @@ while corriendo:
         # pantalla victoria
 
         elif victoria:
-            pygame.mixer.stop()
+            if victoria_inicio is None:
+                victoria_inicio = pygame.time.get_ticks()
+                pygame.mixer.stop()
+
+            # animación de nivel completado: el laberinto parpadea
+            tiempo_victoria = pygame.time.get_ticks() - victoria_inicio
+            if (tiempo_victoria // 250) % 2 == 0:
+                mapa.dibujar(pantalla)
+            pacman.dibujar(pantalla)
+
             fuente = pygame.font.SysFont("Courier New", 72, bold=True)
-
-            texto = fuente.render("YOU WIN!", True, (255, 255, 0))
-
+            texto = fuente.render("LEVEL COMPLETE!", True, (255, 255, 0))
             pantalla.blit(
                 texto,
                 (
@@ -345,6 +374,27 @@ while corriendo:
                     ALTO // 2 - texto.get_height() // 2,
                 ),
             )
+
+            # después de la animación, avanzo de nivel
+            if tiempo_victoria >= DURACION_VICTORIA_MS:
+                nivel += 1
+                victoria = False
+                victoria_inicio = None
+                config_aplicada = False
+                puntos_comidos = 0
+                fantasmas_comidos_seguidos = 0
+
+                mapa = Mapa("src/models/mapa_txt.txt", ANCHO, ALTO)
+
+                pacman = PacMan(
+                    x=mapa.pacman_inicio_x,
+                    y=mapa.pacman_inicio_y,
+                    vidas=pacman.vidas,
+                    velocidad=0.80 * 7.5 * mapa.tile,
+                )
+
+                fantasmas.clear()
+                estado_global = Estado()
 
         # juego normal
 
@@ -363,7 +413,8 @@ while corriendo:
                     
             # actualizo el reloj de los fantasmas
             modo = estado_global.obtener_modo()
-            cambio = estado_global.actualizar(dt, False)
+            hay_asustado = any(f.asustado for f in fantasmas)
+            cambio = estado_global.actualizar(dt, hay_asustado)
             if cambio:
                 for fantasma in fantasmas:
                     fantasma.calcular_inversa(mapa)
@@ -453,4 +504,5 @@ while corriendo:
     pygame.display.flip()
     dt = reloj.tick(60) / 1000
 
+menu.guardar_high_score()
 pygame.quit()

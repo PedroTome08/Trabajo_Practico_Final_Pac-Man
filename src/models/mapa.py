@@ -12,11 +12,9 @@ class Mapa:
         for linea in lineas:
             self.grilla.append(list(linea.strip("\n")))
 
-        ancho_maximo = max(len(fila) for fila in self.grilla)
-        for fila in self.grilla:
-            fila.extend([" "] * (ancho_maximo - len(fila)))
+        self.validar()
 
-        self.columnas = ancho_maximo
+        self.columnas = len(self.grilla[0])
         self.filas = len(self.grilla)
         
         HUD_ALTURA = 80
@@ -52,6 +50,47 @@ class Mapa:
                         self.offset_y + f * self.tile + self.tile // 2
                     )
                     self.grilla[f][c] = " "  # limpia ese lugar para que no quede basura
+
+
+    class MapaInvalido(Exception):
+        """Para cuando el archivo del mapa tiene mal formato"""
+        pass
+    
+    def validar(self):
+        """
+        Verifica que la grilla cargada tenga un formato válido.
+        Lanza MapaInvalido con un mensaje descriptivo si algo está mal.
+        """
+        VALIDOS = {"X", ".", "o", " ", "G", "-", "P", "T"}
+
+        if len(self.grilla) == 0:
+            raise self.MapaInvalido("El mapa está vacío: no tiene ninguna fila.")
+
+        ancho = len(self.grilla[0])
+        hay_pacman = False
+        hay_ghost_house = False
+
+        for nro_fila, fila in enumerate(self.grilla):
+            if len(fila) != ancho:
+                raise self.MapaInvalido(
+                    f"La fila {nro_fila} tiene {len(fila)} columnas; "
+                    f"se esperaban {ancho}. Todas las filas deben tener el mismo largo."
+                )
+            for nro_col, caracter in enumerate(fila):
+                if caracter not in VALIDOS:
+                    raise self.MapaInvalido(
+                        f"Carácter inválido '{caracter}' en fila {nro_fila}, "
+                        f"columna {nro_col}. Permitidos: {sorted(VALIDOS)}."
+                    )
+                if caracter == "P":
+                    hay_pacman = True
+                elif caracter == "G":
+                    hay_ghost_house = True
+
+        if not hay_pacman:
+            raise self.MapaInvalido("Falta la posición inicial de Pac-Man ('P').")
+        if not hay_ghost_house:
+            raise self.MapaInvalido("Falta la ghost house ('G').")
 
     def dibujar(self, pantalla):
         """
